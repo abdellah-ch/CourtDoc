@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 7, "column": 0}, "map": {"version":3,"sources":["file://C%3A/Users/abdellah/Documents/messagerie-app/src/app/admin/page.tsx"],"sourcesContent":["'use client';\r\nconst Page = () => {\r\n    console.log(process.env.JWT_SECRET);\r\n\r\n    return (\r\n        <div className=\"relative w-full h-screen\">\r\n            test\r\n        </div>\r\n    );\r\n}\r\n\r\nexport default Page;\r\n"],"names":[],"mappings":";;;;AAAA;;AACA,MAAM,OAAO;IACT,QAAQ,GAAG,CAAC,QAAQ,GAAG,CAAC,UAAU;IAElC,qBACI,8OAAC;QAAI,WAAU;kBAA2B;;;;;;AAIlD;uCAEe","debugId":null}}]
+}

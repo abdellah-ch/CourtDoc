@@ -1,0 +1,7 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/admin/parameters/page": "app/admin/parameters/page.js",
+  "/admin/users/page": "app/admin/users/page.js",
+  "/api/users/route": "app/api/users/route.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js"
+}

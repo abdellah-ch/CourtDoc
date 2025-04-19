@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 7, "column": 0}, "map": {"version":3,"sources":["file://C%3A/Users/abdellah/Documents/messagerie-app/src/app/dashboard/page.tsx"],"sourcesContent":["'use client';\r\nconst Page = () => {\r\n    return (\r\n        <div>\r\n            <h1 className=\"text-2xl font-bold\">Dashboard</h1>\r\n            <p>Welcome to the dashboard!</p>\r\n            <p>This is a protected route.</p>\r\n            <p>You should be able to see this only if you are logged in.</p>\r\n            <p>If you are not logged in, you should be redirected to the login page.</p>\r\n        </div>\r\n    );\r\n}\r\n\r\nexport default Page;\r\n"],"names":[],"mappings":";;;;AAAA;;AACA,MAAM,OAAO;IACT,qBACI,6LAAC;;0BACG,6LAAC;gBAAG,WAAU;0BAAqB;;;;;;0BACnC,6LAAC;0BAAE;;;;;;0BACH,6LAAC;0BAAE;;;;;;0BACH,6LAAC;0BAAE;;;;;;0BACH,6LAAC;0BAAE;;;;;;;;;;;;AAGf;KAVM;uCAYS","debugId":null}}]
+}
