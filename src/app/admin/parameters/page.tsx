@@ -7,15 +7,38 @@ import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Separator } from "@/components/ui/separator";
+import { useEffect, useState } from 'react';
+
+type CourParametre = {
+    NomCour : string,
+    TypeCour:string,
+    AdresseCour:string,
+    VilleCour:string,
+    TelCour:string,
+    FaxCour:string,
+    EmailCour:string,
+    
+}
 
 const ParametersPage = () => {
     const { language, setLanguage } = useLanguage();
     const isArabic = language === 'ar';
+    const [data, setData] = useState<CourParametre>();
+    const fetchParametre = async ()=>{
+        const response =  await fetch("/api/parametre");
+        const data = await response.json();
+        console.log(data);
+        setData(data)
+        
+    }
+    useEffect(()=>{
+        fetchParametre()
+    },[])
 
     return (
         <div
             dir={isArabic ? 'rtl' : 'ltr'}
-            className=" h-fit bg-gradient-to-br from-gray-50 to-gray-100"
+            className="min-h-screen h-fit bg-gradient-to-br from-gray-50 to-gray-100"
         >
             <div className="max-w-4xl max-h-[94vh] mx-auto space-y-6 overflow-y-auto">
                 {/* Header with Language Switcher */}
@@ -56,6 +79,7 @@ const ParametersPage = () => {
                                     <Input
                                         id="court"
                                         placeholder={isArabic ? 'اسم المحكمة' : 'Nom du tribunal'}
+                                        defaultValue={data?.NomCour }
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -65,6 +89,7 @@ const ParametersPage = () => {
                                     <Input
                                         id="courtType"
                                         placeholder={isArabic ? 'نوع المحكمة' : 'Type de tribunal'}
+                                        defaultValue={data?.TypeCour}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -74,6 +99,8 @@ const ParametersPage = () => {
                                     <Input
                                         id="address"
                                         placeholder={isArabic ? 'العنوان' : 'Adresse'}
+                                        defaultValue={data?.AdresseCour}
+
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -83,6 +110,7 @@ const ParametersPage = () => {
                                     <Input
                                         id="city"
                                         placeholder={isArabic ? 'المدينة' : 'Ville'}
+                                        defaultValue={data?.VilleCour}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -92,6 +120,7 @@ const ParametersPage = () => {
                                     <Input
                                         id="phone"
                                         placeholder={isArabic ? 'الهاتف' : 'Téléphone'}
+                                        defaultValue={data?.TelCour}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -101,6 +130,7 @@ const ParametersPage = () => {
                                     <Input
                                         id="fax"
                                         placeholder={isArabic ? 'الفاكس' : 'Fax'}
+                                        defaultValue={data?.FaxCour}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -111,15 +141,21 @@ const ParametersPage = () => {
                                         id="email"
                                         type="email"
                                         placeholder={isArabic ? 'الإيميل' : 'Email'}
+                                        defaultValue={data?.EmailCour}
                                     />
                                 </div>
+                            </div>
+                            <div className="flex justify-end">
+                                <Button type="submit" className="w-full md:w-auto cursor-pointer">
+                                    {isArabic ? 'حفظ التغييرات' : 'Enregistrer les modifications'}
+                                </Button>
                             </div>
                         </form>
                     </CardContent>
                 </Card>
 
                 {/* User Credentials Card */}
-                <Card className="shadow-sm border-0">
+                {/* <Card className="shadow-sm border-0">
                     <CardHeader>
                         <CardTitle className="text-lg">
                             {isArabic ? 'بيانات المستخدم' : 'Identifiants utilisateur'}
@@ -167,7 +203,7 @@ const ParametersPage = () => {
                             </div>
                         </form>
                     </CardContent>
-                </Card>
+                </Card> */}
             </div>
         </div>
     );

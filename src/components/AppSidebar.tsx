@@ -38,18 +38,36 @@ export function AppSidebar() {
     const accessDropdownLinks = [
         {
             href: "/admin/access/interfaces",
-            label: isArabic ? "وصلات الواجهات" : "Accès interfaces",
+            label: isArabic ? "صلاحيات الواجهات" : "Accès interfaces",
             icon: <BsShieldLock className="w-5 h-5" />
         },
         {
             href: "/admin/access/filieres",
-            label: isArabic ? "وصلات الفروع" : "Accès filières",
+            label: isArabic ? "صلاحيات الشعب" : "Accès filières",
             icon: <BsShieldLock className="w-5 h-5" />
         },
     ];
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         // Add your logout logic here
+        try {
+            const response = await fetch('/api/logout', { // Adjust the URL to your API route
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.ok) {
+                console.log('Logout successful');
+                // Redirect to login page or handle redirection as needed
+                window.location.href = '/login'; // Or use any other logic
+            } else {
+                console.error('Logout failed');
+            }
+        } catch (error) {
+            console.error('Error during logout:', error);
+        }
         console.log("User logged out");
     };
 

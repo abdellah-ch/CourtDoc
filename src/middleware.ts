@@ -20,7 +20,7 @@ export async function middleware(req: NextRequest) {
     const { payload } = await jwtVerify(token, SECRET);
     console.log('Token verified:', payload);
     //regular user
-    if(payload.role === 3) {
+    if(payload.role != "Admin") {
       if(req.url.includes('/admin')) {
         console.log('User is not admin, redirecting to dashboard');
         return NextResponse.redirect(new URL('/dashboard', req.url));

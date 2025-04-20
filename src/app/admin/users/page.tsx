@@ -111,7 +111,7 @@ const UserManagementPage = () => {
     };
     useEffect(() => {
         // Fetch users from API (mocked here)
-       
+
 
         const fetchCadresFonctions = async () => {
             const response = await fetch('/api/cadres-functions');
@@ -137,7 +137,7 @@ const UserManagementPage = () => {
             setValue("hireDate", new Date(selectedUsers[0].DateEmbauche));
             setValue("role", selectedUsers[0].UserFonctionne.IdUserFonctionne?.toString() || '');
             setValue("cadre", selectedUsers[0].Cadre.IdCadre?.toString() || '');
-        }else{
+        } else {
             reset();
         }
     }, [selectedUsers]);
@@ -146,10 +146,35 @@ const UserManagementPage = () => {
 
         toast.success(isArabic ? 'تم إضافة المستخدم بنجاح' : 'Utilisateur ajouté avec succès');
     };
+    const createUser = async (formData: FormData) => {
 
-    const updateUser = async (formData:FormData)=>{
+        try {
+            const res = await fetch('/api/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            if (!res.ok) {
+                const message = await res.text();
+                toast.error(isArabic ? 'فشل في إضافة المستخدم' : "Échec de l'ajout de l'utilisateur");
+
+            }
+            fetchUsers();
+            toast.success(isArabic ? 'تم إضافة المستخدم بنجاح' : 'Utilisateur ajouté avec succès');
+
+        } catch (err) {
+            toast.error(isArabic ? 'فشل في إضافة المستخدم' : "Échec de l'ajout de l'utilisateur");
+
+            throw err;
+        }
+    }
+
+    const updateUser = async (formData: FormData) => {
         console.log(formData);
-        
+
         if (!selectedUsers[0]) return
         try {
             const res = await fetch(`/api/users/${selectedUsers[0].IdUtilisateur}`, {
@@ -364,8 +389,11 @@ const UserManagementPage = () => {
 
                             <div className="flex  gap-4 pt-6 px-0 w-full">
                                 <Button
-                                    type="submit"
+                                    type="button"
                                     className="w-1/4 cursor-pointer"
+                                    disabled={selectedUsers.length > 0}
+                                    onClick={handleSubmit(createUser)}
+
                                 >
                                     {translations.buttons.save}
                                 </Button>

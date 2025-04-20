@@ -48,11 +48,14 @@ model Filieres {
   DeletedBy          String?              @db.NVarChar(100)
   DeletedDate        DateTime?            @db.DateTime
   IsDeleted          Boolean?             @default(false, map: "DF__Filieres__IsDele__76969D2E")
+  IdGroupeFiliere    Int?
   CodeFilieres       CodeFilieres[]
+  GroupeFilieres     GroupeFilieres?      @relation(fields: [IdGroupeFiliere], references: [IdGroupeFiliere], onDelete: NoAction, onUpdate: NoAction, map: "FK_Filieres_GroupeFilieres")
   UtilisateurFiliere UtilisateurFiliere[]
 
   @@index([IsDeleted], map: "IX_Filieres_IsDeleted")
   @@index([Libelle], map: "IX_Filieres_Libelle")
+  @@index([IdGroupeFiliere], map: "IX_Filieres_IdGroupeFiliere")
 }
 
 model Messageries {
@@ -207,26 +210,54 @@ model UtilisateurFiliere {
 }
 
 model Utilisateurs {
-  IdUtilisateur      Int                  @id(map: "PK__Utilisat__45A4C15734AEA3A7") @default(autoincrement())
-  CodeUtilisateur    Int
-  MotDePasse         String               @db.NVarChar(100)
-  Nom                String               @db.NVarChar(100)
-  Prenom             String               @db.NVarChar(100)
-  Tel                String?              @db.NVarChar(20)
-  Email              String?              @db.NVarChar(100)
-  DateEmbauche       DateTime             @db.Date
-  DateAffectation    DateTime             @db.Date
-  IdRole             Int
-  IsDeleted          Boolean?             @default(false, map: "DF__Utilisate__IsDel__71D1E811")
-  IdCadre            Int?
-  IdUserFonctionne   Int?
-  UserName           String?              @db.NVarChar(100)
-  UtilisateurFiliere UtilisateurFiliere[]
-  Roles              Roles                @relation(fields: [IdRole], references: [IdRole], onUpdate: NoAction, map: "FK__Utilisate__IdRol__398D8EEE")
-  Cadre              Cadre?               @relation(fields: [IdCadre], references: [IdCadre], onDelete: NoAction, onUpdate: NoAction, map: "FK_Utilisateurs_Cadre")
-  UserFonctionne     UserFonctionne?      @relation(fields: [IdUserFonctionne], references: [IdUserFonctionne], onDelete: NoAction, onUpdate: NoAction, map: "FK_Utilisateurs_UserFonctionne")
+  IdUtilisateur             Int                         @id(map: "PK__Utilisat__45A4C15734AEA3A7") @default(autoincrement())
+  MotDePasse                String                      @db.NVarChar(100)
+  Nom                       String                      @db.NVarChar(100)
+  Prenom                    String                      @db.NVarChar(100)
+  Tel                       String?                     @db.NVarChar(20)
+  Email                     String?                     @db.NVarChar(100)
+  DateEmbauche              DateTime                    @db.Date
+  DateAffectation           DateTime                    @db.Date
+  IdRole                    Int
+  IsDeleted                 Boolean?                    @default(false, map: "DF__Utilisate__IsDel__71D1E811")
+  IdCadre                   Int?
+  IdUserFonctionne          Int?
+  UserName                  String?                     @db.NVarChar(100)
+  UtilisateurFiliere        UtilisateurFiliere[]
+  UtilisateurGroupeFilieres UtilisateurGroupeFilieres[]
+  Roles                     Roles                       @relation(fields: [IdRole], references: [IdRole], onUpdate: NoAction, map: "FK__Utilisate__IdRol__398D8EEE")
+  Cadre                     Cadre?                      @relation(fields: [IdCadre], references: [IdCadre], onDelete: NoAction, onUpdate: NoAction, map: "FK_Utilisateurs_Cadre")
+  UserFonctionne            UserFonctionne?             @relation(fields: [IdUserFonctionne], references: [IdUserFonctionne], onDelete: NoAction, onUpdate: NoAction, map: "FK_Utilisateurs_UserFonctionne")
 
-  @@index([CodeUtilisateur], map: "IX_Utilisateurs_CodeUtilisateur")
   @@index([IdRole], map: "IX_Utilisateurs_IdRole")
   @@index([Nom, Prenom], map: "IX_Utilisateurs_NomPrenom")
+}
+
+model GroupeFilieres {
+  IdGroupeFiliere           Int                         @id(map: "PK__GroupeFi__5597BAD56451AD9E") @default(autoincrement())
+  Libelle                   String                      @db.NVarChar(100)
+  Filieres                  Filieres[]
+  UtilisateurGroupeFilieres UtilisateurGroupeFilieres[]
+}
+
+model UtilisateurGroupeFilieres {
+  IdUtilisateur   Int
+  IdGroupeFiliere Int
+  GroupeFilieres  GroupeFilieres @relation(fields: [IdGroupeFiliere], references: [IdGroupeFiliere], onUpdate: NoAction, map: "FK__Utilisate__IdGro__43D61337")
+  Utilisateurs    Utilisateurs   @relation(fields: [IdUtilisateur], references: [IdUtilisateur], onUpdate: NoAction, map: "FK__Utilisate__IdUti__42E1EEFE")
+
+  @@id([IdUtilisateur, IdGroupeFiliere], map: "PK__Utilisat__00FDBAFAAB0622DA")
+  @@index([IdGroupeFiliere], map: "IX_UtilisateurGroupeFilieres_IdGroupeFiliere")
+  @@index([IdUtilisateur], map: "IX_UtilisateurGroupeFilieres_IdUtilisateur")
+}
+
+model Parametre {
+  Id          Int     @id(map: "PK__Parametr__3214EC07FAFAB23A") @default(autoincrement())
+  NomCour     String? @db.Text
+  TypeCour    String? @db.Text
+  AdresseCour String? @db.Text
+  VilleCour   String? @db.Text
+  TelCour     String? @db.VarChar(20)
+  FaxCour     String? @db.VarChar(20)
+  EmailCour   String? @db.VarChar(100)
 }

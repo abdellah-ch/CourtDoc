@@ -11,12 +11,14 @@ export default function LoginPage() {
 
   const [UserName, setUserName] = useState('');
   const [Password, setPassword] = useState('');
+  const [isDisabled,setIsDisabled] = useState(false)
   const [error, setError] = useState('');
 
   const isArabic = language === 'ar';
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsDisabled(true)
     try {
       const res = await fetch('/api/login', {
         method: 'POST',
@@ -97,10 +99,13 @@ export default function LoginPage() {
               />
             </div>
             <button
-              type="submit"
-              disabled={!UserName || !Password}
+              type="button"
+              disabled={isDisabled || UserName === "" || Password === ""}
               onClick={handleLogin}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-md font-bold"
+              
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-md font-bold cursor-pointer disabled:bg-gray-400 
+             disabled:cursor-not-allowed 
+             disabled:opacity-70"
             >
               {isArabic ? 'دخول' : 'Se connecter'}
             </button>
