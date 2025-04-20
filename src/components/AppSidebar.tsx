@@ -60,7 +60,7 @@ export function AppSidebar() {
                 <SidebarHeader className="px-4 py-6">
                     <div className="flex items-center space-x-3">
                         <Avatar className="border-2 border-primary">
-                            <AvatarImage src="/admin-avatar.png" />
+                            {/* <AvatarImage src="/admin-avatar.png" /> */}
                             <AvatarFallback>AD</AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col">

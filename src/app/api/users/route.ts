@@ -5,6 +5,7 @@ import { PrismaClient } from '@/generated/prisma/client'
 
 const prisma = new PrismaClient()
 
+//get all the users 
 export async function GET() {
   try {
     const users = await prisma.utilisateurs.findMany({
@@ -24,6 +25,11 @@ export async function GET() {
     )
   }
 }
+
+
+
+
+
 
 export async function POST(request: Request) {
   try {
