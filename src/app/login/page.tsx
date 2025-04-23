@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/context/LanguageContext';
 import LanguageWrapper from '@/components/LanguageWrapper';
+import { toast } from 'sonner';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -43,9 +44,9 @@ export default function LoginPage() {
       }
       
     } catch (error) {
-      console.error('Login error:', error);
       setError(isArabic ? 'خطأ في تسجيل الدخول' : 'Erreur de connexion');
-
+      toast.error('خطأ في تسجيل الدخول')
+      setIsDisabled(false)
     }
     // if (
     //   UserName.toLowerCase() === 'ahmed' &&

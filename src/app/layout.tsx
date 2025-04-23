@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { LanguageProvider } from '@/context/LanguageContext';
 
 import { Cairo, Poppins } from 'next/font/google';
+import { Toaster } from 'sonner';
 
 const cairo = Cairo({
   subsets: ['arabic', 'latin'],
@@ -27,7 +28,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="">
       <body className={`${cairo.variable} ${poppins.variable} bg-gray-100 text-gray-900`}>
-        <LanguageProvider>{children}</LanguageProvider>
+
+        <LanguageProvider>
+          <Toaster />
+          {children}
+        </LanguageProvider>
       </body>
     </html>
   );
