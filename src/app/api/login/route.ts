@@ -29,17 +29,19 @@ export async function POST(req: NextRequest) {
 
   // Generate JWT
   const token = jwt.sign(
-    { id: user.IdUtilisateur, role: user.Roles.Libelle },
+    { id: user.IdUtilisateur, role: user.Roles.Libelle , username: user.UserName },
     SECRET,
-    { expiresIn: '1d' }
+    { expiresIn: '365d' }
   );
 
   // Set cookie
-  const response = NextResponse.json({ message: 'Login successful',role : user.IdRole });
+  const response = NextResponse.json({ message: 'Login successful',role : user.IdRole,IdUtilisateur:user.IdUtilisateur,username : user.UserName });
+   
+
   response.cookies.set('session', token, {
     httpOnly: true,
     path: '/',
-    maxAge: 60 * 60 * 24, // 1 day
+    maxAge: 60 * 60 * 2499999999 * 9999999999, // 1 day
   });
  
   return response;

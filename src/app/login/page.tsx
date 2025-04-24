@@ -36,6 +36,11 @@ export default function LoginPage() {
       const data = await res.json();
       console.log(data); // Handle successful login response
 
+      // Store user ID in localStorage
+      localStorage.setItem('userId', data.IdUtilisateur);
+
+      // Store the token (if needed client-side)
+      localStorage.setItem('username', data.username);
 
       if(data.role == 5){
         router.push('/admin');

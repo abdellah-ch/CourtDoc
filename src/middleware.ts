@@ -19,7 +19,7 @@ export async function middleware(req: NextRequest) {
     // Verify the JWT using `jose`
     const { payload } = await jwtVerify(token, SECRET);
     console.log('Token verified:', payload);
-    //regular user
+         //regular user
     if(payload.role != "Admin") {
       if(req.url.includes('/admin')) {
         console.log('User is not admin, redirecting to dashboard');
