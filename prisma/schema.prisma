@@ -51,6 +51,7 @@ model Filieres {
   IdGroupeFiliere    Int?
   CodeFilieres       CodeFilieres[]
   GroupeFilieres     GroupeFilieres?      @relation(fields: [IdGroupeFiliere], references: [IdGroupeFiliere], onDelete: NoAction, onUpdate: NoAction, map: "FK_Filieres_GroupeFilieres")
+  Messageries        Messageries[]
   UtilisateurFiliere UtilisateurFiliere[]
 
   @@index([IsDeleted], map: "IX_Filieres_IsDeleted")
@@ -63,12 +64,9 @@ model Messageries {
   NumeroOrdre            String                  @db.NVarChar(100)
   CodeMessagerie         String                  @db.NVarChar(100)
   CodeComplet            String                  @db.NVarChar(100)
-  NumeroMessage          String                  @db.NVarChar(100)
   DateMessage            DateTime                @db.Date
   DateArrivee            DateTime?               @db.Date
   Sujet                  String                  @db.NVarChar(255)
-  Expediteur             String                  @db.NVarChar(100)
-  Destinataire           String?                 @db.NVarChar(100)
   Remarques              String?                 @db.NVarChar(Max)
   Statut                 String                  @db.NVarChar(100)
   IdType                 Int?
@@ -83,17 +81,18 @@ model Messageries {
   IdSource               Int?
   IsDeleted              Boolean?                @default(false, map: "DF__Messageri__IsDel__0B91BA14")
   IdDocument             Int?
+  IdFiliere              Int?
   Etude                  Etude[]
   CodeFilieres           CodeFilieres            @relation(fields: [IdCode], references: [IdCode], onUpdate: NoAction, map: "FK__Messageri__IdCod__5535A963")
   ProsecutorResponsables ProsecutorResponsables? @relation(fields: [IdProsecutor], references: [IdResponsable], onDelete: NoAction, onUpdate: NoAction, map: "FK__Messageri__IdPro__5441852A")
   Sources                Sources?                @relation(fields: [IdSource], references: [IdSource], onDelete: NoAction, onUpdate: NoAction, map: "FK__Messageri__IdSou__5629CD9C")
   TypeMessageries        TypeMessageries?        @relation(fields: [IdType], references: [IdType], onDelete: NoAction, onUpdate: NoAction, map: "FK__Messageri__IdTyp__534D60F1")
+  Filieres               Filieres?               @relation(fields: [IdFiliere], references: [IdFiliere], onDelete: NoAction, onUpdate: NoAction, map: "FK_Messageries_Filieres")
   Reponses               Reponses[]
   Resultats              Resultats[]
 
   @@index([CodeComplet], map: "IX_Messageries_CodeComplet")
   @@index([DateMessage], map: "IX_Messageries_DateMessage")
-  @@index([Expediteur], map: "IX_Messageries_Expediteur")
   @@index([IdCode], map: "IX_Messageries_IdCode")
   @@index([IdDocument], map: "IX_Messageries_IdDocument")
   @@index([IdProsecutor], map: "IX_Messageries_IdProsecutor")
@@ -253,11 +252,11 @@ model UtilisateurGroupeFilieres {
 
 model Parametre {
   Id          Int     @id(map: "PK__Parametr__3214EC07FAFAB23A") @default(autoincrement())
-  NomCour     String? @db.Text
-  TypeCour    String? @db.Text
-  AdresseCour String? @db.Text
-  VilleCour   String? @db.Text
-  TelCour     String? @db.VarChar(20)
-  FaxCour     String? @db.VarChar(20)
-  EmailCour   String? @db.VarChar(100)
+  NomCour     String? @db.NVarChar(100)
+  TypeCour    String? @db.NVarChar(100)
+  AdresseCour String? @db.NVarChar(100)
+  VilleCour   String? @db.NVarChar(100)
+  TelCour     String? @db.NVarChar(100)
+  FaxCour     String? @db.NVarChar(100)
+  EmailCour   String? @db.NVarChar(100)
 }
