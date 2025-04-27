@@ -54,8 +54,7 @@ export async function POST(request: Request) {
       : 1;
 
     // 3. Generate CodeComplet (format: numeroOrdre/codeFiliere/year)
-    const codeComplet = `${nextNumeroOrdre}/${codeFiliereValue}/${currentYear}`;
-
+    const codeComplet = `${currentYear}/${codeFiliereValue}/${nextNumeroOrdre}`;
     // 4. Create the new messagerie
     const newMessagerie = await prisma.messageries.create({
       data: {
