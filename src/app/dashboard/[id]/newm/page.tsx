@@ -320,7 +320,7 @@ export default function AddMessagerieForm() {
                   <FormLabel>الإنجاز</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger dir="rtl" className="w-[200px] cursor-pointer">
+                      <SelectTrigger dir="rtl" className="w-full cursor-pointer">
                         <SelectValue placeholder="الإنجاز" />
                       </SelectTrigger>
                     </FormControl>
@@ -342,7 +342,7 @@ export default function AddMessagerieForm() {
                   <FormLabel>طبيعة المراسلة</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger dir="rtl" className="w-[200px] cursor-pointer">
+                      <SelectTrigger dir="rtl" className="w-full cursor-pointer">
                         <SelectValue placeholder="اختر طبيعة الإرسالية" />
                       </SelectTrigger>
                     </FormControl>
@@ -367,14 +367,14 @@ export default function AddMessagerieForm() {
                   <FormLabel>نوع المصدر</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger dir="rtl" className="w-[200px] cursor-pointer">
+                      <SelectTrigger dir="rtl" className="w-full cursor-pointer">
                         <SelectValue placeholder="اختر نوع المصدر" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent dir="rtl">
                       {allSources?.map((source: any) => (
                         <SelectItem key={source.IdTypeSource} value={source.IdTypeSource?.toString()}>
-                          ({source.Libelle})
+                          {source.Libelle}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -398,19 +398,12 @@ export default function AddMessagerieForm() {
                       placeholder="اختر المصدر"
                       searchPlaceholder="ابحث عن المصدر..."
                       renderItem={(eleme: any) => `${eleme.NomSource}`}
-
                     />
-
-                  ) : (<Input className="w-[200px]" placeholder="مصدر أخر" />)}
-
-
+                  ) : (<Input className="w-full" placeholder="مصدر أخر" />)}
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-
-
 
             <FormField
               control={form.control}
@@ -420,7 +413,7 @@ export default function AddMessagerieForm() {
                   <FormLabel> النائب المكلف (إختياري)</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger dir="rtl" className="w-[200px] cursor-pointer">
+                      <SelectTrigger dir="rtl" className="w-full cursor-pointer">
                         <SelectValue placeholder="اختر النائب المكلف" />
                       </SelectTrigger>
                     </FormControl>
@@ -444,10 +437,15 @@ export default function AddMessagerieForm() {
               variant="outline"
               onClick={() => {
                 form.reset();
-                toast.info('تم إلغاء العملية', {
-                  position: 'top-center',
-                  duration: 2000,
-                });
+              }}
+            >
+             جديد 
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                router.push(`/dashboard/${id}/record`)
               }}
             >
               إلغاء

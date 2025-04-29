@@ -78,8 +78,17 @@ export function MessageriesTable<TData extends Messagerie>({
       cell: ({ row }) => <div className="text-right">{row.getValue("NumeroOrdre")}</div>,
     },
     {
+      accessorKey: "TypeMessageries.Libelle",
+      header: "طبيعة المراسلة",
+      cell: ({ row }) => (
+        <div className="text-right">
+          {row.original.TypeMessageries?.Libelle || "---"}
+        </div>
+      ),
+    },
+    {
       accessorKey: "CodeComplet",
-      header: "الرمز الكامل",
+      header: "رقم الملف",
       cell: ({ row }) => <div className="text-right font-medium">{row.getValue("CodeComplet")}</div>,
     },
     {
@@ -112,15 +121,7 @@ export function MessageriesTable<TData extends Messagerie>({
       header: "الموضوع",
       cell: ({ row }) => <div className="text-right">{row.getValue("Sujet")}</div>,
     },
-    {
-      accessorKey: "Statut",
-      header: "الحالة",
-      cell: ({ row }) => (
-        <Badge variant={row.getValue("Statut") === "منجز" ? "default" : "destructive"}>
-          {row.getValue("Statut")}
-        </Badge>
-      ),
-    },
+    
     {
       accessorKey: "Sources.NomSource",
       header: "المصدر",
@@ -130,22 +131,25 @@ export function MessageriesTable<TData extends Messagerie>({
         </div>
       ),
     },
+
+    //add Number of Responses
+    // {
+    //   accessorKey: "Filieres.Libelle",
+    //   header: "الشعبة",
+    //   cell: ({ row }) => (
+    //     <div className="text-right">
+    //       {row.original.Filieres?.Libelle || "---"}
+    //     </div>
+    //   ),
+    // },
+    
     {
-      accessorKey: "Filieres.Libelle",
-      header: "الشعبة",
+      accessorKey: "Statut",
+      header: "الحالة",
       cell: ({ row }) => (
-        <div className="text-right">
-          {row.original.Filieres?.Libelle || "---"}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "TypeMessageries.Libelle",
-      header: "نوع الرسالة",
-      cell: ({ row }) => (
-        <div className="text-right">
-          {row.original.TypeMessageries?.Libelle || "---"}
-        </div>
+        <Badge variant={row.getValue("Statut") === "منجز" ? "default" : "destructive"}>
+          {row.getValue("Statut")}
+        </Badge>
       ),
     },
     {
@@ -183,11 +187,11 @@ export function MessageriesTable<TData extends Messagerie>({
 
   const router = useRouter()
   return (
-    <div dir="rtl">
-      <div className="flex items-center py-4 gap-4 flex-wrap justify-between">
+    <div dir="rtl" className="custom-scrollbar">
+      <div className="flex items-center py-2 gap-4 flex-wrap justify-between">
         <div className="flex items-center py-4 gap-4">
           <Input
-            placeholder="ابحث بالرمز الكامل..."
+            placeholder="ابحث برقم الملف..."
             value={(table.getColumn("CodeComplet")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
               table.getColumn("CodeComplet")?.setFilterValue(event.target.value)

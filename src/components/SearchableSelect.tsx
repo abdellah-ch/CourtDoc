@@ -31,7 +31,7 @@ export function SearchableSelect({
 
     return (
         <Select value={value} onValueChange={onValueChange} >
-            <SelectTrigger dir='rtl' className='cursor-pointer w-[200px]'>
+            <SelectTrigger dir='rtl' className='cursor-pointer w-full'>
                 <SelectValue placeholder={placeholder} />
             </SelectTrigger>
             <SelectContent>
