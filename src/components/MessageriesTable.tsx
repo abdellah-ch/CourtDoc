@@ -25,7 +25,7 @@ import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { format } from 'date-fns'
 import { Badge } from "@/components/ui/badge"
-import { MoreHorizontal, PlusIcon } from "lucide-react"
+import { ChevronLeft, Eye, FileText, MoreHorizontal, PlusIcon, Printer, Trash2 } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,6 +58,7 @@ interface Messagerie {
   TypeMessageries?: {
     Libelle: string
   }
+  Reponses?: any[]
 }
 
 interface DataTableProps<TData> {
@@ -121,7 +122,7 @@ export function MessageriesTable<TData extends Messagerie>({
       header: "الموضوع",
       cell: ({ row }) => <div className="text-right">{row.getValue("Sujet")}</div>,
     },
-    
+
     {
       accessorKey: "Sources.NomSource",
       header: "المصدر",
@@ -131,7 +132,33 @@ export function MessageriesTable<TData extends Messagerie>({
         </div>
       ),
     },
+    {
+      accessorKey: "ReponsesCount",
+      header: "الإجابات",
+      cell: ({ row }) => {
+        const router = useRouter();
+        const { id } = useParams();
+        const count = row.original.Reponses?.length || 0;
 
+        return (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 px-2 hover:bg-gray-100 font-normal"
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(`/dashboard/${id}/messagerie/${row.original.IdMessagerie}`);
+            }}
+          >
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm">{count}</span>
+              <span className="text-sm text-muted-foreground">إجابات</span>
+              <ChevronLeft className="h-3 w-3 text-muted-foreground" />
+            </div>
+          </Button>
+        );
+      },
+    },
     //add Number of Responses
     // {
     //   accessorKey: "Filieres.Libelle",
@@ -142,7 +169,7 @@ export function MessageriesTable<TData extends Messagerie>({
     //     </div>
     //   ),
     // },
-    
+
     {
       accessorKey: "Statut",
       header: "الحالة",
@@ -154,20 +181,62 @@ export function MessageriesTable<TData extends Messagerie>({
     },
     {
       id: "actions",
-      cell: ({ row }) => (
-        <DropdownMenu dir="rtl">
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <MoreHorizontal className="h-4 w-4" />
+      cell: ({ row }) => {
+        const router = useRouter();
+        const { id } = useParams();
+
+        return (
+          <div className="flex items-center gap-1">
+            {/* View Details Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-gray-100"
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/dashboard/${id}/messagerie/${row.original.IdMessagerie}`);
+              }}
+            >
+              <Eye className="h-4 w-4" />
+              <span className="sr-only">عرض التفاصيل</span>
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>عرض التفاصيل</DropdownMenuItem>
-            <DropdownMenuItem>تعديل</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
-    },
+
+            {/* Delete Button (Visual Only) */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-gray-100"
+              onClick={(e) => {
+                e.stopPropagation();
+                // Delete functionality would go here
+              }}
+            >
+              <Trash2 className="h-4 w-4" />
+              <span className="sr-only">حذف</span>
+            </Button>
+
+            {/* Overflow Menu for Additional Actions */}
+            <DropdownMenu dir="rtl">
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0 text-muted-foreground hover:bg-gray-100">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem className="cursor-pointer">
+                  <FileText className="mr-2 h-4 w-4" />
+                  تصدير PDF
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer">
+                  <Printer className="mr-2 h-4 w-4" />
+                  طباعة
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        );
+      },
+    }
   ]
 
   const table = useReactTable({
@@ -215,7 +284,7 @@ export function MessageriesTable<TData extends Messagerie>({
             className="max-w-xs"
           />
         </div>
-        
+
         <Button variant="default" className="gap-2" onClick={(e) => { e.preventDefault(); router.push(`/dashboard/${id}/newm`) }}>
           <PlusIcon className="h-4 w-4" />
           إضافة

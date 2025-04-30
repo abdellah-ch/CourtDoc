@@ -71,19 +71,7 @@ export async function createMessagerie(messagerieData:any) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        numeroMessage: messagerieData.numeroMessage,
-        dateMessage: messagerieData.dateMessage,
-        dateArrivee: messagerieData.dateArrivee,
-        sujet: messagerieData.sujet,
-        remarques: messagerieData.remarques,
-        statut: messagerieData.statut,
-        idType: messagerieData.idType,
-        IdTypeSource: messagerieData.IdTypeSource,
-        idProsecutor: messagerieData.idProsecutor,
-        idCode: messagerieData.idCode,
-        idSource: messagerieData.idSource,
-      }),
+      body: JSON.stringify(messagerieData),
     });
 
     if (!response.ok) {

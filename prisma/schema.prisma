@@ -60,38 +60,41 @@ model Filieres {
 }
 
 model Messageries {
-  IdMessagerie           Int                     @id(map: "PK__Messager__89D73AEE80FE574E") @default(autoincrement())
-  NumeroOrdre            String                  @db.NVarChar(100)
-  CodeMessagerie         String                  @db.NVarChar(100)
-  CodeComplet            String                  @db.NVarChar(100)
-  DateMessage            DateTime                @db.Date
-  DateArrivee            DateTime?               @db.Date
-  Sujet                  String                  @db.NVarChar(255)
-  Remarques              String?                 @db.NVarChar(Max)
-  Statut                 String                  @db.NVarChar(100)
-  IdType                 Int?
-  IdProsecutor           Int?
-  IdCode                 Int
-  AddedBy                String?                 @db.NVarChar(100)
-  AddedDate              DateTime?               @default(now(), map: "DF__Messageri__Added__0A9D95DB") @db.DateTime
-  UpdatedBy              String?                 @db.NVarChar(100)
-  UpdatedDate            DateTime?               @db.DateTime
-  DeletedBy              String?                 @db.NVarChar(100)
-  DeletedDate            DateTime?               @db.DateTime
-  IdSource               Int?
-  IsDeleted              Boolean?                @default(false, map: "DF__Messageri__IsDel__0B91BA14")
-  IdDocument             Int?
-  IdFiliere              Int?
-  Etude                  Etude[]
-  CodeFilieres           CodeFilieres            @relation(fields: [IdCode], references: [IdCode], onUpdate: NoAction, map: "FK__Messageri__IdCod__5535A963")
-  ProsecutorResponsables ProsecutorResponsables? @relation(fields: [IdProsecutor], references: [IdResponsable], onDelete: NoAction, onUpdate: NoAction, map: "FK__Messageri__IdPro__5441852A")
-  Sources                Sources?                @relation(fields: [IdSource], references: [IdSource], onDelete: NoAction, onUpdate: NoAction, map: "FK__Messageri__IdSou__5629CD9C")
-  TypeMessageries        TypeMessageries?        @relation(fields: [IdType], references: [IdType], onDelete: NoAction, onUpdate: NoAction, map: "FK__Messageri__IdTyp__534D60F1")
-  Filieres               Filieres?               @relation(fields: [IdFiliere], references: [IdFiliere], onDelete: NoAction, onUpdate: NoAction, map: "FK_Messageries_Filieres")
-  Reponses               Reponses[]
-  Resultats              Resultats[]
+  IdMessagerie                                                    Int                     @id(map: "PK__Messager__89D73AEE80FE574E") @default(autoincrement())
+  NumeroOrdre                                                     String                  @db.NVarChar(100)
+  CodeBarre                                                       String                  @db.NVarChar(100)
+  NumeroMessagerie                                                String                  @db.NVarChar(100)
+  DateMessage                                                     DateTime                @db.Date
+  DateArrivee                                                     DateTime?               @db.Date
+  Sujet                                                           String                  @db.NVarChar(255)
+  Remarques                                                       String?                 @db.NVarChar(Max)
+  Statut                                                          String                  @db.NVarChar(100)
+  IdType                                                          Int?
+  IdProsecutor                                                    Int?
+  IdCode                                                          Int
+  AddedBy                                                         String?                 @db.NVarChar(100)
+  AddedDate                                                       DateTime?               @default(now(), map: "DF__Messageri__Added__0A9D95DB") @db.DateTime
+  UpdatedBy                                                       String?                 @db.NVarChar(100)
+  UpdatedDate                                                     DateTime?               @db.DateTime
+  DeletedBy                                                       String?                 @db.NVarChar(100)
+  DeletedDate                                                     DateTime?               @db.DateTime
+  IdSource                                                        Int?
+  IsDeleted                                                       Boolean?                @default(false, map: "DF__Messageri__IsDel__0B91BA14")
+  IdDocument                                                      Int?
+  IdFiliere                                                       Int?
+  CodeReference                                                   String?                 @db.NVarChar(100)
+  AutreLibelleSource                                              String?                 @db.NVarChar(255)
+  Etude                                                           Etude[]
+  MessagerieLinks_MessagerieLinks_IdMessagerieSourceToMessageries MessagerieLinks[]       @relation("MessagerieLinks_IdMessagerieSourceToMessageries")
+  MessagerieLinks_MessagerieLinks_IdMessagerieCibleToMessageries  MessagerieLinks[]       @relation("MessagerieLinks_IdMessagerieCibleToMessageries")
+  CodeFilieres                                                    CodeFilieres            @relation(fields: [IdCode], references: [IdCode], onUpdate: NoAction, map: "FK__Messageri__IdCod__5535A963")
+  ProsecutorResponsables                                          ProsecutorResponsables? @relation(fields: [IdProsecutor], references: [IdResponsable], onDelete: NoAction, onUpdate: NoAction, map: "FK__Messageri__IdPro__5441852A")
+  Sources                                                         Sources?                @relation(fields: [IdSource], references: [IdSource], onDelete: NoAction, onUpdate: NoAction, map: "FK__Messageri__IdSou__5629CD9C")
+  TypeMessageries                                                 TypeMessageries?        @relation(fields: [IdType], references: [IdType], onDelete: NoAction, onUpdate: NoAction, map: "FK__Messageri__IdTyp__534D60F1")
+  Filieres                                                        Filieres?               @relation(fields: [IdFiliere], references: [IdFiliere], onDelete: NoAction, onUpdate: NoAction, map: "FK_Messageries_Filieres")
+  Reponses                                                        Reponses[]
+  Resultats                                                       Resultats[]
 
-  @@index([CodeComplet], map: "IX_Messageries_CodeComplet")
   @@index([DateMessage], map: "IX_Messageries_DateMessage")
   @@index([IdCode], map: "IX_Messageries_IdCode")
   @@index([IdDocument], map: "IX_Messageries_IdDocument")
@@ -100,6 +103,8 @@ model Messageries {
   @@index([IsDeleted], map: "IX_Messageries_IsDeleted")
   @@index([NumeroOrdre], map: "IX_Messageries_NumeroOrdre")
   @@index([Statut], map: "IX_Messageries_Statut")
+  @@index([CodeReference], map: "IX_Messageries_CodeReference")
+  @@index([NumeroMessagerie], map: "IX_Messageries_NumeroMessagerie")
 }
 
 model ProsecutorResponsables {
@@ -259,4 +264,20 @@ model Parametre {
   TelCour     String? @db.NVarChar(100)
   FaxCour     String? @db.NVarChar(100)
   EmailCour   String? @db.NVarChar(100)
+}
+
+model MessagerieLinks {
+  IdLink                                                      Int         @id(map: "PK__Messager__31D8A6ED8E1931C8") @default(autoincrement())
+  IdMessagerieSource                                          Int
+  IdMessagerieCible                                           Int
+  DateLiaison                                                 DateTime?   @default(now(), map: "DF__Messageri__DateL__76619304") @db.DateTime
+  AddedBy                                                     String?     @db.NVarChar(100)
+  AddedDate                                                   DateTime?   @default(now(), map: "DF__Messageri__Added__7755B73D") @db.DateTime
+  Messageries_MessagerieLinks_IdMessagerieSourceToMessageries Messageries @relation("MessagerieLinks_IdMessagerieSourceToMessageries", fields: [IdMessagerieSource], references: [IdMessagerie], onUpdate: NoAction, map: "FK_MessagerieLinks_Source")
+  Messageries_MessagerieLinks_IdMessagerieCibleToMessageries  Messageries @relation("MessagerieLinks_IdMessagerieCibleToMessageries", fields: [IdMessagerieCible], references: [IdMessagerie], onUpdate: NoAction, map: "FK_MessagerieLinks_Target")
+
+  @@unique([IdMessagerieSource, IdMessagerieCible], map: "UQ_MessagerieLinks_SourceTarget")
+  @@index([DateLiaison], map: "IX_MessagerieLinks_DateLiaison")
+  @@index([IdMessagerieSource], map: "IX_MessagerieLinks_Source")
+  @@index([IdMessagerieCible], map: "IX_MessagerieLinks_Target")
 }

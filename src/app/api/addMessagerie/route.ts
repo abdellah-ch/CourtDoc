@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
-
-import { PrismaClient } from '@/generated/prisma';
+import { PrismaClient } from '@/generated/prisma/client';
 const prisma = new PrismaClient()
 
 export async function POST(request: Request) {
   try {
     const {
-      numeroMessage,
+      CodeReference,
+      NumeroMessagerie,
+      CodeBarre,
       dateMessage,
       dateArrivee,
       sujet,
@@ -16,7 +17,8 @@ export async function POST(request: Request) {
       IdTypeSource,
       idProsecutor,
       idCode,
-      idSource
+      idSource,
+      AutreLibelleSource
     } = await request.json();
 
     // 1. Fetch the related CodeFiliere to get the Valeur (code) and IdFiliere
@@ -53,23 +55,31 @@ export async function POST(request: Request) {
       ? parseInt(lastMessagerie.NumeroOrdre) + 1
       : 1;
 
-    // 3. Generate CodeComplet (format: numeroOrdre/codeFiliere/year)
-    const codeComplet = `${currentYear}/${codeFiliereValue}/${currentYear}`;
-    // 4. Create the new messagerie
+    // 3. Generate CodeComplet (format: year/codeFiliere/numeroOrdre)
+    const codeComplet = `${currentYear}/${codeFiliereValue}/${nextNumeroOrdre.toString().padStart(3, '0')}`;
+
+    // 4. Determine NumeroMessagerie based on idType
+    const finalNumeroMessagerie = parseInt(idType) === 1 
+      ? NumeroMessagerie 
+      : codeComplet;
+
+    // 5. Create the new messagerie with all fields
     const newMessagerie = await prisma.messageries.create({
       data: {
         NumeroOrdre: nextNumeroOrdre.toString(),
-        CodeMessagerie: numeroMessage,
-        CodeComplet: codeComplet,
+        CodeBarre: CodeBarre,
+        NumeroMessagerie: finalNumeroMessagerie,
+        CodeReference: CodeReference,
         DateMessage: new Date(dateMessage),
         DateArrivee: dateArrivee ? new Date(dateArrivee) : null,
         Sujet: sujet,
         Remarques: remarques,
         Statut: statut,
         IdType: parseInt(idType),
-        IdProsecutor: parseInt(idProsecutor),
+        IdProsecutor: idProsecutor ? parseInt(idProsecutor) : null,
         IdCode: parseInt(idCode),
-        IdSource: parseInt(idSource),
+        IdSource: idSource ? parseInt(idSource) : null,
+        AutreLibelleSource: AutreLibelleSource,
         IdFiliere: idFiliere,
         AddedDate: new Date(),
         IsDeleted: false

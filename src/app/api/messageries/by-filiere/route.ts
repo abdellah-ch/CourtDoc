@@ -25,6 +25,7 @@ export async function GET(req: NextRequest) {
                         Libelle: true
                     }
                 },
+                Reponses : true,
                 Sources: {
                     select: {
                         NomSource: true

@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="">
+    <html lang="" dir='rtl'>
       <body className={`${cairo.variable} ${poppins.variable} bg-gray-100 text-gray-900`}>
 
         <LanguageProvider>

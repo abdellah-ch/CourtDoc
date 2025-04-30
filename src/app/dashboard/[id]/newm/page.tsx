@@ -30,11 +30,13 @@ import { toast } from "sonner";
 import { useEffect, useRef, useState } from "react";
 import { createMessagerie, fetchCodeFilieres, fetchFiliereLibelle, fetchMessageTypes, fetchResponsables, fetchSources } from "@/lib/FetchMessagerieInfo";
 import { useParams, useRouter } from 'next/navigation';
-import { sources } from "next/dist/compiled/webpack/webpack";
+// import { sources } from "next/dist/compiled/webpack/webpack";
 import { SearchableSelect } from "@/components/SearchableSelect";
 
 const formSchema = z.object({
-  numeroMessage: z.string().min(1, "حقل مطلوب"),
+  CodeReference: z.string().optional(),
+  NumeroMessagerie: z.string().optional(),
+  CodeBarre: z.string().min(1, "حقل مطلوب"),
   dateMessage: z.date({ required_error: "حقل مطلوب" }),
   dateArrivee: z.date({ required_error: "حقل مطلوب" }),
   sujet: z.string().min(1, "حقل مطلوب"),
@@ -44,7 +46,8 @@ const formSchema = z.object({
   IdTypeSource: z.string().min(1, "حقل مطلوب"),
   idProsecutor: z.string().optional(),
   idCode: z.string().min(1, "حقل مطلوب"),
-  idSource: z.string().min(1, "حقل مطلوب"),
+  idSource: z.string().optional(),
+  AutreLibelleSource: z.string().min(1, "حفل مطلوب")
   // document: z.instanceof(File).optional(),
 });
 
@@ -56,15 +59,26 @@ export default function AddMessagerieForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      numeroMessage: "",
+      CodeReference: "",
+      NumeroMessagerie: "",
+      CodeBarre: "",
+      dateMessage: undefined,
+      dateArrivee: undefined,
       sujet: "",
+      remarques: "",
       statut: "",
+      idType: "",
+      IdTypeSource: "",
+      idProsecutor: "",
+      idCode: "",
+      idSource: "",
+      AutreLibelleSource: ""
     },
   });
 
 
   const selectedIdTypeSource = form.watch("IdTypeSource");
-
+  const selectedIdTypeMessagerie = form.watch("idType")
   const [selectedSources, setSelectedSources] = useState<string>("")
   const [messageTypes, setMessageTypes] = useState<any[]>([])
   const [filiereLibelle, setFiliereLibelle] = useState<string>("")
@@ -141,6 +155,37 @@ export default function AddMessagerieForm() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" method="post">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {
+              Number(selectedIdTypeMessagerie) === 1 ? (
+                <FormField
+                  control={form.control}
+                  name="NumeroMessagerie"
+                  render={({ field }) => (
+                    <FormItem className="text-right">
+                      <FormLabel>رقم الإرسالية</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder=" أدخل رقم الإرسالية " />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ) : null
+            }
+
+            <FormField
+              control={form.control}
+              name="CodeReference"
+              render={({ field }) => (
+                <FormItem className="text-right">
+                  <FormLabel>المرجع</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder=" أدخل رقم المرجع " />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="idCode"
@@ -165,23 +210,11 @@ export default function AddMessagerieForm() {
                 </FormItem>
               )}
             />
-            {/* <FormField
-              control={form.control}
-              name="codeMessagerie"
-              render={({ field }) => (
-                <FormItem className="text-right">
-                  <FormLabel> رمز الشعبة</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="أدخل رمز الشعبة" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            /> */}
+
 
             <FormField
               control={form.control}
-              name="numeroMessage"
+              name="CodeBarre"
               render={({ field }) => (
                 <FormItem className="text-right">
                   <FormLabel>رقم المضمون</FormLabel>
@@ -241,7 +274,7 @@ export default function AddMessagerieForm() {
               name="dateArrivee"
               render={({ field }) => (
                 <FormItem className="flex flex-col text-right">
-                  <FormLabel>تاريخ الوصول (اختياري)</FormLabel>
+                  <FormLabel>تاريخ الوصول </FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -384,26 +417,53 @@ export default function AddMessagerieForm() {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="idSource"
-              render={({ field }) => (
-                <FormItem className="text-right">
-                  <FormLabel>المصدر</FormLabel>
-                  {!anotherSource ? (
-                    <SearchableSelect
-                      items={Availablesources}
-                      value={field.value || ""}
-                      onValueChange={field.onChange}
-                      placeholder="اختر المصدر"
-                      searchPlaceholder="ابحث عن المصدر..."
-                      renderItem={(eleme: any) => `${eleme.NomSource}`}
-                    />
-                  ) : (<Input className="w-full" placeholder="مصدر أخر" />)}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
+
+            {
+              !anotherSource ? (
+                <FormField
+                  control={form.control}
+                  name="idSource"
+                  render={({ field }) => (
+                    <FormItem className="text-right">
+                      <FormLabel>اختر المصدر </FormLabel>
+                      <SearchableSelect
+                        items={Availablesources}
+                        value={field.value || ""}
+                        onValueChange={field.onChange}
+                        placeholder="اختر المصدر"
+                        searchPlaceholder="ابحث عن المصدر..."
+                        renderItem={(eleme: any) => `${eleme.NomSource}`}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ) : (<FormField
+                control={form.control}
+                name="AutreLibelleSource"
+                render={({ field }) => (
+                  <FormItem className="text-right">
+                    <FormLabel> مصدر أخر</FormLabel>
+                    <FormControl>
+                      <Input {...field}
+                        placeholder=" أدخل مصدر"
+                        value={field.value || ""}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          // Clear the other field when typing here
+                          form.setValue('idSource', '');
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />)
+            }
+
+
+
 
             <FormField
               control={form.control}
@@ -439,7 +499,7 @@ export default function AddMessagerieForm() {
                 form.reset();
               }}
             >
-             جديد 
+              جديد
             </Button>
             <Button
               type="button"

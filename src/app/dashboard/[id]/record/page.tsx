@@ -74,6 +74,7 @@ export default function FiliereArchivePage({ params }: any) {
         }
 
         setFilteredData(result);
+
     }, [messageries, yearFilter, statusFilter]);
 
     // const handleExportExcel = () => {
@@ -89,6 +90,8 @@ export default function FiliereArchivePage({ params }: any) {
         return { value: year.toString(), label: year.toString() };
     });
 
+    console.log("messageries",messageries);
+     
     return (
         <div className="p-6 space-y-4">
             <div className="flex justify-between items-center">
