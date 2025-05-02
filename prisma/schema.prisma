@@ -125,20 +125,21 @@ model ProsecutorResponsables {
 }
 
 model Reponses {
-  IdReponse    Int         @id(map: "PK__Reponses__F886310035350033") @default(autoincrement())
-  DateReponse  DateTime    @db.Date
-  Contenu      String      @db.NVarChar(Max)
-  IdMessagerie Int
-  IdSource     Int?
-  AddedBy      String?     @db.NVarChar(100)
-  AddedDate    DateTime?   @default(now(), map: "DF__Reponses__AddedD__123EB7A3") @db.DateTime
-  UpdatedBy    String?     @db.NVarChar(100)
-  UpdatedDate  DateTime?   @db.DateTime
-  DeletedBy    String?     @db.NVarChar(100)
-  DeletedDate  DateTime?   @db.DateTime
-  IsDeleted    Boolean?    @default(false, map: "DF__Reponses__IsDele__1332DBDC")
-  Messageries  Messageries @relation(fields: [IdMessagerie], references: [IdMessagerie], onUpdate: NoAction, map: "FK__Reponses__IdMess__5AEE82B9")
-  Sources      Sources?    @relation(fields: [IdSource], references: [IdSource], onDelete: NoAction, onUpdate: NoAction, map: "FK__Reponses__IdSour__5BE2A6F2")
+  IdReponse          Int         @id(map: "PK__Reponses__F886310035350033") @default(autoincrement())
+  DateReponse        DateTime    @db.Date
+  Contenu            String      @db.NVarChar(Max)
+  IdMessagerie       Int
+  IdSource           Int?
+  AddedBy            String?     @db.NVarChar(100)
+  AddedDate          DateTime?   @default(now(), map: "DF__Reponses__AddedD__123EB7A3") @db.DateTime
+  UpdatedBy          String?     @db.NVarChar(100)
+  UpdatedDate        DateTime?   @db.DateTime
+  DeletedBy          String?     @db.NVarChar(100)
+  DeletedDate        DateTime?   @db.DateTime
+  IsDeleted          Boolean?    @default(false, map: "DF__Reponses__IsDele__1332DBDC")
+  AutreLibelleSource String?     @db.NVarChar(100)
+  Messageries        Messageries @relation(fields: [IdMessagerie], references: [IdMessagerie], onUpdate: NoAction, map: "FK__Reponses__IdMess__5AEE82B9")
+  Sources            Sources?    @relation(fields: [IdSource], references: [IdSource], onDelete: NoAction, onUpdate: NoAction, map: "FK__Reponses__IdSour__5BE2A6F2")
 
   @@index([DateReponse], map: "IX_Reponses_DateReponse")
   @@index([IdMessagerie], map: "IX_Reponses_IdMessagerie")

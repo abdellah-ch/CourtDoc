@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@/generated/prisma/client";
-import { sources } from "next/dist/compiled/webpack/webpack";
 
 const prisma = new PrismaClient()
 
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ IdMessagerie: string }> }) {
+export async function GET(req:NextRequest, { params }: { params: Promise<{ IdMessagerie: string }> }) {
     const { IdMessagerie } = await params
 
     // console.log("ghoiheihoihodhfioezhifhzeoihfiezh",idMessagerie);

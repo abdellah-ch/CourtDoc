@@ -33,12 +33,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useParams, useRouter } from "next/navigation"
+import { DeleteAlert } from "./DeleteAlert"
+import { toast } from "sonner"
 
 interface Messagerie {
   IdMessagerie: number
   NumeroOrdre: string
-  CodeComplet: string
-  CodeMessagerie: string
+  NumeroMessagerie: string
+  CodeBarre: string
+  AutreLibelleSource: string
   DateMessage: string
   DateArrivee: string | null
   Sujet: string
@@ -62,22 +65,38 @@ interface Messagerie {
 }
 
 interface DataTableProps<TData> {
+  setRefresh : (item:boolean)=>void
   data: any[]
 }
 
 export function MessageriesTable<TData extends Messagerie>({
+  setRefresh,
   data,
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [IdDeleteMessagerie,setIdDeleteMessagerie] = useState<number>(0)
   const { id } = useParams(); // Gets [id] from the URL
+  const handleDelete = (Id:number) => {
+    // Your delete logic here
+    console.log("Item deleted",Id);
+    setIsDeleteOpen(false);
+    fetch(`/api/delete/${Id}`).then(()=>{
+      console.log("");
+      toast.success("تم")
+      setRefresh(true)
+    }).catch((err)=>{
+      toast.error("error",err)
+    })
+  };
   const columns: ColumnDef<TData>[] = [
     {
       accessorKey: "NumeroOrdre",
       header: "الرقم الترتيبي",
       cell: ({ row }) => <div className="text-right">{row.getValue("NumeroOrdre")}</div>,
     },
+
     {
       accessorKey: "TypeMessageries.Libelle",
       header: "طبيعة المراسلة",
@@ -88,14 +107,19 @@ export function MessageriesTable<TData extends Messagerie>({
       ),
     },
     {
-      accessorKey: "CodeComplet",
-      header: "رقم الملف",
-      cell: ({ row }) => <div className="text-right font-medium">{row.getValue("CodeComplet")}</div>,
+      accessorKey: "NumeroMessagerie",
+      header: "رقم الإرسالية",
+      cell: ({ row }) => <div className="text-right font-medium">{row.getValue("NumeroMessagerie")}</div>,
     },
     {
-      accessorKey: "CodeMessagerie",
+      accessorKey: "CodeBarre",
       header: "رقم المضمون",
-      cell: ({ row }) => <div className="text-right">{row.getValue("CodeMessagerie")}</div>,
+      cell: ({ row }) => <div className="text-right">{row.getValue("CodeBarre")}</div>,
+    },
+    {
+      accessorKey: "CodeReference",
+      header: "رقم المرجع",
+      cell: ({ row }) => <div className="text-right">{row.getValue("CodeReference")}</div>,
     },
     {
       accessorKey: "DateMessage",
@@ -128,13 +152,13 @@ export function MessageriesTable<TData extends Messagerie>({
       header: "المصدر",
       cell: ({ row }) => (
         <div className="text-right">
-          {row.original.Sources?.NomSource || "---"}
+          {row.original.Sources?.NomSource || row.original.AutreLibelleSource}
         </div>
       ),
     },
     {
       accessorKey: "ReponsesCount",
-      header: "الإجابات",
+      header: "أجوبة",
       cell: ({ row }) => {
         const router = useRouter();
         const { id } = useParams();
@@ -144,7 +168,7 @@ export function MessageriesTable<TData extends Messagerie>({
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 px-2 hover:bg-gray-100 font-normal"
+            className="h-8 px-2 hover:bg-gray-100 font-normal cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
               router.push(`/dashboard/${id}/messagerie/${row.original.IdMessagerie}`);
@@ -159,17 +183,6 @@ export function MessageriesTable<TData extends Messagerie>({
         );
       },
     },
-    //add Number of Responses
-    // {
-    //   accessorKey: "Filieres.Libelle",
-    //   header: "الشعبة",
-    //   cell: ({ row }) => (
-    //     <div className="text-right">
-    //       {row.original.Filieres?.Libelle || "---"}
-    //     </div>
-    //   ),
-    // },
-
     {
       accessorKey: "Statut",
       header: "الحالة",
@@ -191,7 +204,7 @@ export function MessageriesTable<TData extends Messagerie>({
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-gray-100"
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-gray-100 cursor-pointer"
               onClick={(e) => {
                 e.stopPropagation();
                 router.push(`/dashboard/${id}/messagerie/${row.original.IdMessagerie}`);
@@ -205,13 +218,16 @@ export function MessageriesTable<TData extends Messagerie>({
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-gray-100"
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-gray-100 cursor-pointer"
               onClick={(e) => {
                 e.stopPropagation();
                 // Delete functionality would go here
+                setIdDeleteMessagerie(row.original.IdMessagerie)
+                setIsDeleteOpen(true)
+
               }}
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-4 w-4 " />
               <span className="sr-only">حذف</span>
             </Button>
 
@@ -257,21 +273,27 @@ export function MessageriesTable<TData extends Messagerie>({
   const router = useRouter()
   return (
     <div dir="rtl" className="custom-scrollbar">
+      <DeleteAlert
+        open={isDeleteOpen}
+        onOpenChange={setIsDeleteOpen}
+        onConfirm={handleDelete}
+        IdDeleteMessagerie={IdDeleteMessagerie}
+      />
       <div className="flex items-center py-2 gap-4 flex-wrap justify-between">
         <div className="flex items-center py-4 gap-4">
           <Input
-            placeholder="ابحث برقم الملف..."
-            value={(table.getColumn("CodeComplet")?.getFilterValue() as string) ?? ""}
+            placeholder="ابحث برقم الإرسالية..."
+            value={(table.getColumn("NumeroMessagerie")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
-              table.getColumn("CodeComplet")?.setFilterValue(event.target.value)
+              table.getColumn("NumeroMessagerie")?.setFilterValue(event.target.value)
             }
             className="max-w-xs"
           />
           <Input
             placeholder="ابحث برقم المضمون..."
-            value={(table.getColumn("CodeMessagerie")?.getFilterValue() as string) ?? ""}
+            value={(table.getColumn("CodeBarre")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
-              table.getColumn("CodeMessagerie")?.setFilterValue(event.target.value)
+              table.getColumn("CodeBarre")?.setFilterValue(event.target.value)
             }
             className="max-w-xs"
           />

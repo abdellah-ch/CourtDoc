@@ -44,6 +44,8 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { MessageFormModal } from "@/components/MessageFormModal";
+import { DeleteAlert } from "@/components/DeleteAlert";
+import { toast } from "sonner";
 
 export default function MessageDetailPage() {
   const { idMessagerie } = useParams();
@@ -51,14 +53,36 @@ export default function MessageDetailPage() {
   const [message, setMessage] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("message");
   const [isEditing, setIsEditing] = useState(false);
-
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [IdDeleteReponse,setIdDeleteReponse] = useState<number>(0)
+  const [refresh,setRefresh] = useState<boolean>(false);
+  
+  const handleDelete = (IdDeleteResponse: number) => {
+    // Your delete logic here
+    console.log("Item deleted", IdDeleteReponse);
+    setIsDeleteOpen(false);
+    fetch(`/api/delete/reponse/${IdDeleteReponse}`).then((res) => {
+      console.log("");
+      console.log(res);
+      
+      res.json()
+    })
+    .then((data)=>{
+     console.log(data);
+      
+      toast.success("تم")
+    })
+    .catch((err) => {
+      toast.error("error", err)
+    })
+  };
   useEffect(() => {
     fetch(`/api/messageries/${idMessagerie}`)
       .then(res => res.json())
       .then(data => {
         setMessage(data); console.log(data);
       });
-  }, [idMessagerie]);
+  }, [idMessagerie,isDeleteOpen,refresh]);
 
   if (!message) return <div className="flex justify-center items-center h-64">Loading...</div>;
 
@@ -69,6 +93,12 @@ export default function MessageDetailPage() {
 
   return (
     <div className="h-full space-y-6" dir="rtl">
+      <DeleteAlert
+        open={isDeleteOpen}
+        onOpenChange={setIsDeleteOpen}
+        onConfirm={handleDelete}
+        IdDeleteMessagerie={Number(IdDeleteReponse)}
+      />
       {/* Header with Back Button */}
       <div className="flex items-center justify-between">
         <Button
@@ -105,7 +135,7 @@ export default function MessageDetailPage() {
         <CardHeader className="border-b">
           <div className="flex justify-between items-start">
             <div>
-              <CardTitle className="text-2xl mb-2">رقم الملف : {message.CodeComplet}</CardTitle>
+              <CardTitle className="text-2xl mb-2">رقم الإرسالية : {message.NumeroMessagerie}</CardTitle>
               <CardDescription className="flex items-center gap-4">
                 <span>
                   <span className="font-medium">تاريخ الإرسال:</span> {format(new Date(message.DateMessage), "dd/MM/yyyy")}
@@ -154,7 +184,7 @@ export default function MessageDetailPage() {
             </div>
             <div>
               <Label className="text-muted-foreground">رقم المضمون</Label>
-              <p className="font-medium mt-1">{message.CodeMessagerie}</p>
+              <p className="font-medium mt-1">{message.CodeBarre}</p>
             </div>
             <div>
               <Label className="text-muted-foreground">الموضوع</Label>
@@ -183,7 +213,8 @@ export default function MessageDetailPage() {
           </TabsTrigger>
           <TabsTrigger value="responses" className="gap-2 cursor-pointer">
             <MessageSquareText className="h-4 w-4" />
-            إجابات ({message.Reponses?.length || 0})
+            أجوبة ({message.Reponses?.filter((response: any) => response?.IsDeleted === false).length || 0})
+
           </TabsTrigger>
           <TabsTrigger value="etude" className="gap-2 cursor-pointer">
             <BookMarked className="h-4 w-4" />
@@ -231,7 +262,7 @@ export default function MessageDetailPage() {
                 <CardTitle>سجل الأجوبة</CardTitle>
                 <CardDescription>جميع الأجوبة المرتبطة بهذه الرسالة</CardDescription>
               </div>
-              <MessageFormModal idMessagerie={idMessagerie?.toString() || ""} /> 
+              <MessageFormModal setRefresh={setRefresh} idMessagerie={idMessagerie?.toString() || ""} />
             </CardHeader>
             <CardContent>
               {message.Reponses?.length > 0 ? (
@@ -245,25 +276,38 @@ export default function MessageDetailPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {message.Reponses.map((response: any) => (
-                      <TableRow key={response.IdReponse} className="cursor-pointer hover:bg-muted/50">
-                        <TableCell className="font-medium text-right">
-                          {response.Sources?.NomSource || "---"}
-                        </TableCell>
-                        <TableCell className="text-right">{response.Contenu}</TableCell>
-                        <TableCell className="text-right">
-                          {response.DateReponse && format(new Date(response.DateReponse), "dd/MM/yyyy")}
-                        </TableCell>
-                        <TableCell className="flex gap-2 justify-start">
-                          <Button variant="ghost" size="sm" className="h-8 gap-1">
-                            <Trash2 className="h-3.5 w-3.5" />
-                            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                              حذف
-                            </span>
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {message.Reponses.map((response: any) => {
+                      if (response.IsDeleted == false) {
+                        return (<TableRow key={response.IdReponse} className="cursor-pointer hover:bg-muted/50">
+                          <TableCell className="font-medium text-right">
+                            {response.Sources?.NomSource || response.AutreLibelleSource}
+                          </TableCell>
+                          <TableCell className="text-right">{response.Contenu}</TableCell>
+                          <TableCell className="text-right">
+                            {response.DateReponse && format(new Date(response.DateReponse), "dd/MM/yyyy")}
+                          </TableCell>
+                          <TableCell className="flex gap-2 justify-start">
+                            <Button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // Delete functionality would go here
+                                setIdDeleteReponse(response.IdReponse)
+                                setIsDeleteOpen(true)
+                              }}
+                              variant="ghost" size="sm" className="h-8 gap-1">
+                              <Trash2 className="h-3.5 w-3.5" />
+                              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                                حذف
+                              </span>
+                            </Button>
+                          </TableCell>
+                        </TableRow>)
+
+                      } else {
+                        null
+                      }
+                    }
+                    )}
                   </TableBody>
                 </Table>
               ) : (

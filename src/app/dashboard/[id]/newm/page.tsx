@@ -100,7 +100,6 @@ export default function AddMessagerieForm() {
     if (selectedIdTypeSource) {
       console.log("Selected IdTypeSource:", selectedIdTypeSource);
       if (parseInt(selectedIdTypeSource) === 5) {
-
         setAnotherSource(true)
       } else {
         allSources.forEach((element: any) => {
