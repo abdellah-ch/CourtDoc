@@ -49,6 +49,8 @@ import { DeleteAlert } from "@/components/DeleteAlert";
 import { toast } from "sonner";
 import { Messageries } from "@/generated/prisma";
 import { EtudeWorkflow } from "@/components/EtudeWorkflow";
+import { MessageLinksManager } from "@/components/MessageLinksManager";
+import { fetchMessageriesByFiliere } from "@/lib/FetchMessagerieInfo";
 
 export default function MessageDetailPage() {
   const { idMessagerie } = useParams();
@@ -63,8 +65,10 @@ export default function MessageDetailPage() {
   const [editedData, setEditedData] = useState<Partial<Messageries>>({});
   const [resultat, setResultat] = useState("");
 
-  const [newStudyDate, setNewStudyDate] = useState<string>("");
-  const [currentEtude, setCurrentEtude] = useState<any>()
+  const [messageries, setMessageries] = useState<any[]>([]);
+  const params = useParams();
+  console.log(params.id);
+
 
 
   const handleChange = (field: keyof Messageries, value: any) => {
@@ -109,7 +113,9 @@ export default function MessageDetailPage() {
       })
   };
   useEffect(() => {
-
+    if (params.id) {
+      fetchMessageriesByFiliere(parseInt(params.id.toString()), setMessageries);
+    }
     if (message) {
       setResultat(message.resultat)
     }
@@ -397,7 +403,7 @@ export default function MessageDetailPage() {
           </TabsTrigger>
           <TabsTrigger value="attachments" className="gap-2 cursor-pointer">
             <Paperclip className="h-4 w-4" />
-            المرفقات ({message.PiecesJointes?.length || 0})
+            المراسلات المضمومة
           </TabsTrigger>
         </TabsList>
 
@@ -528,46 +534,12 @@ export default function MessageDetailPage() {
 
         {/* Attachments */}
         <TabsContent value="attachments" className="pt-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>الملفات المرفقة</CardTitle>
-                <CardDescription>جميع الملفات المرتبطة بهذه الرسالة</CardDescription>
-              </div>
-              <Button variant="outline" className="gap-2">
-                <Paperclip className="h-4 w-4" />
-                إضافة مرفق
-              </Button>
-            </CardHeader>
-            <CardContent>
-              {message.PiecesJointes?.length > 0 ? (
-                <div className="space-y-2">
-                  {message.PiecesJointes.map((file: any) => (
-                    <div key={file.IdPiece} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
-                      <div className="flex items-center gap-3">
-                        <FileText className="h-5 w-5 text-muted-foreground" />
-                        <div>
-                          <p className="font-medium">{file.NomFichier}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {file.Taille} - {format(new Date(file.DateAjout), "dd/MM/yyyy")}
-                          </p>
-                        </div>
-                      </div>
-                      <Button variant="ghost" size="sm" className="gap-1">
-                        <Download className="h-4 w-4" />
-                        تحميل
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-12 gap-2 text-muted-foreground">
-                  <Paperclip className="h-8 w-8" />
-                  <p>لا توجد مرفقات</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <MessageLinksManager
+            message={message}
+            refreshData={setRefresh}
+            allMessages={messageries}
+            refresh={refresh}
+          />
         </TabsContent>
       </Tabs>
     </div>

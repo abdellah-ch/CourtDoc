@@ -151,7 +151,7 @@ export function EtudeWorkflow({ message, refreshData }: {
                 type="date"
                 value={newStudyDate}
                 onChange={(e) => setNewStudyDate(e.target.value)}
-                className="mt-1"
+                className="mt-3"
                 required
               />
             </div>
