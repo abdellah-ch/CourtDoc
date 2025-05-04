@@ -30,7 +30,7 @@ model Etude {
   IdEtude      Int         @id(map: "PK__Etude__23BA6831E1880F75") @default(autoincrement())
   Etude        Boolean?
   DateEtude    DateTime    @db.Date
-  DateRetour   DateTime    @db.Date
+  DateRetour   DateTime?   @db.Date
   IdMessagerie Int
   Messageries  Messageries @relation(fields: [IdMessagerie], references: [IdMessagerie], onUpdate: NoAction, map: "FK__Etude__IdMessage__5EBF139D")
 
@@ -84,6 +84,7 @@ model Messageries {
   IdFiliere                                                       Int?
   CodeReference                                                   String?                 @db.NVarChar(100)
   AutreLibelleSource                                              String?                 @db.NVarChar(255)
+  resultat                                                        String?                 @db.NVarChar(300)
   Etude                                                           Etude[]
   MessagerieLinks_MessagerieLinks_IdMessagerieSourceToMessageries MessagerieLinks[]       @relation("MessagerieLinks_IdMessagerieSourceToMessageries")
   MessagerieLinks_MessagerieLinks_IdMessagerieCibleToMessageries  MessagerieLinks[]       @relation("MessagerieLinks_IdMessagerieCibleToMessageries")

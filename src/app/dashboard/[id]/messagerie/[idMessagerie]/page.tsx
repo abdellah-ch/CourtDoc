@@ -39,6 +39,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -46,6 +47,8 @@ import { Label } from "@/components/ui/label";
 import { MessageFormModal } from "@/components/MessageFormModal";
 import { DeleteAlert } from "@/components/DeleteAlert";
 import { toast } from "sonner";
+import { Messageries } from "@/generated/prisma";
+import { EtudeWorkflow } from "@/components/EtudeWorkflow";
 
 export default function MessageDetailPage() {
   const { idMessagerie } = useParams();
@@ -53,10 +56,39 @@ export default function MessageDetailPage() {
   const [message, setMessage] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("message");
   const [isEditing, setIsEditing] = useState(false);
+  const [isResultEditing, setIsResultEditing] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [IdDeleteReponse,setIdDeleteReponse] = useState<number>(0)
-  const [refresh,setRefresh] = useState<boolean>(false);
-  
+  const [IdDeleteReponse, setIdDeleteReponse] = useState<number>(0)
+  const [refresh, setRefresh] = useState<boolean>(false);
+  const [editedData, setEditedData] = useState<Partial<Messageries>>({});
+  const [resultat, setResultat] = useState("");
+
+  const [newStudyDate, setNewStudyDate] = useState<string>("");
+  const [currentEtude, setCurrentEtude] = useState<any>()
+
+
+  const handleChange = (field: keyof Messageries, value: any) => {
+    setEditedData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveChanges = () => {
+    setIsEditing(false);
+    console.log("Changes to save:", editedData);
+    fetch(`/api/updateMessagerie/${idMessagerie}`, {
+      method: "PUT",
+      body: JSON.stringify({
+        editedData
+      })
+    }).then((res) => {
+      console.log(res);
+      setRefresh((prev) => !prev)
+      toast.success("تم التحديث بنجاح")
+    })
+    // Implement your save logic here
+
+  };
+
+
   const handleDelete = (IdDeleteResponse: number) => {
     // Your delete logic here
     console.log("Item deleted", IdDeleteReponse);
@@ -64,31 +96,45 @@ export default function MessageDetailPage() {
     fetch(`/api/delete/reponse/${IdDeleteReponse}`).then((res) => {
       console.log("");
       console.log(res);
-      
+
       res.json()
     })
-    .then((data)=>{
-     console.log(data);
-      
-      toast.success("تم")
-    })
-    .catch((err) => {
-      toast.error("error", err)
-    })
+      .then((data) => {
+        console.log(data);
+
+        toast.success("تم")
+      })
+      .catch((err) => {
+        toast.error("error", err)
+      })
   };
   useEffect(() => {
+
+    if (message) {
+      setResultat(message.resultat)
+    }
     fetch(`/api/messageries/${idMessagerie}`)
       .then(res => res.json())
       .then(data => {
         setMessage(data); console.log(data);
       });
-  }, [idMessagerie,isDeleteOpen,refresh]);
+  }, [idMessagerie, isDeleteOpen, refresh, isResultEditing]);
 
   if (!message) return <div className="flex justify-center items-center h-64">Loading...</div>;
 
-  const handleUpdateMessage = async () => {
+  const handleUpdateResultat = () => {
     // Implement update logic
-    setIsEditing(false);
+    setIsResultEditing(false);
+    console.log(resultat);
+    fetch(`/api/updateResultat/${idMessagerie}`, {
+      method: "PUT",
+      body: JSON.stringify({
+        resultat: resultat
+      })
+    }).then((res) => {
+      setRefresh((prev) => !prev)
+      toast.success("تم")
+    })
   };
 
   return (
@@ -119,48 +165,88 @@ export default function MessageDetailPage() {
             <Download className="h-4 w-4" />
             تصدير
           </Button>
-          <Button
-            variant="outline"
-            className="gap-2"
-            onClick={() => setIsEditing(!isEditing)}
-          >
-            <Edit className="h-4 w-4" />
-            {isEditing ? 'إلغاء التعديل' : 'تعديل'}
-          </Button>
         </div>
       </div>
 
       {/* Message Header */}
-      <Card>
-        <CardHeader className="border-b">
-          <div className="flex justify-between items-start">
-            <div>
-              <CardTitle className="text-2xl mb-2">رقم الإرسالية : {message.NumeroMessagerie}</CardTitle>
-              <CardDescription className="flex items-center gap-4">
-                <span>
-                  <span className="font-medium">تاريخ الإرسال:</span> {format(new Date(message.DateMessage), "dd/MM/yyyy")}
-                </span>
-                <span>
-                  <span className="font-medium">تاريخ الوصول:</span> {message.DateArrivee ? format(new Date(message.DateArrivee), "dd/MM/yyyy") : "---"}
-                </span>
-              </CardDescription>
+      <Card className="rounded-lg shadow-md border-0">
+        <CardHeader className="border-b px-6 py-4 bg-white rounded-t-lg">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+            <div className="space-y-2 flex-1">
+              <CardTitle className="text-2xl font-bold text-gray-800">
+                {isEditing ? (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-gray-600">رقم الإرسالية</Label>
+                    <Input
+                      defaultValue={message.NumeroMessagerie}
+                      onChange={(e) => handleChange('NumeroMessagerie', e.target.value)}
+                      className="bg-white text-gray-800 border-gray-300"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-600">رقم الإرسالية:</span>
+                    <span className="text-gray-800">{message.NumeroMessagerie}</span>
+                  </div>
+                )}
+              </CardTitle>
+
+              <div className="flex flex-col sm:flex-row gap-4 text-sm">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-gray-600">تاريخ الإرسال:</span>
+                  {isEditing ? (
+                    <Input
+                      type="date"
+                      // defaultValue={message.DateMessage.toISOString().split('T')[0]}
+                      onChange={(e) => handleChange('DateMessage', new Date(e.target.value))}
+                      className="bg-white text-gray-800 border-gray-300 w-full max-w-[180px]"
+                    />
+                  ) : (
+                    <span className="text-gray-700">
+                      {format(new Date(message.DateMessage), "dd/MM/yyyy")}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-gray-600">تاريخ الوصول:</span>
+                  {isEditing ? (
+                    <Input
+                      type="date"
+                      // defaultValue={message.DateArrivee?.toISOString().split('T')[0]}
+                      onChange={(e) => handleChange('DateArrivee', e.target.value ? new Date(e.target.value) : null)}
+                      className="bg-white text-gray-800 border-gray-300 w-full max-w-[180px]"
+                    />
+                  ) : (
+                    <span className="text-gray-700">
+                      {message.DateArrivee ? format(new Date(message.DateArrivee), "dd/MM/yyyy") : "---"}
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-end md:justify-start">
               {isEditing ? (
-                <Select defaultValue={message.Statut}>
-                  <SelectTrigger className="w-[120px]">
-                    <SelectValue placeholder="الحالة" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="منجز">منجز</SelectItem>
-                    <SelectItem value="غير منجز">غير منجز</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="min-w-[150px]">
+                  <Label className="text-sm font-medium text-gray-600 block mb-1">الحالة</Label>
+                  <Select
+                    defaultValue={message.Statut}
+                    onValueChange={(value) => handleChange('Statut', value)}
+                  >
+                    <SelectTrigger className="bg-white border-gray-300 text-gray-800">
+                      <SelectValue placeholder="الحالة" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-gray-200">
+                      <SelectItem value="منجز" className="hover:bg-white">منجز</SelectItem>
+                      <SelectItem value="غير منجز" className="hover:bg-white">غير منجز</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               ) : (
                 <Badge
                   variant={message.Statut === "منجز" ? "default" : "destructive"}
-                  className="text-sm"
+                  className="text-sm px-3 py-1 rounded-full"
                 >
                   {message.Statut}
                 </Badge>
@@ -168,40 +254,129 @@ export default function MessageDetailPage() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div>
-              <Label className="text-muted-foreground">المصدر</Label>
-              <p className="font-medium mt-1">{message.Sources?.NomSource || "---"}</p>
+
+        <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Column 1 */}
+          <div className="space-y-4">
+            {/* Source */}
+            <div className="bg-white p-3 rounded-lg">
+              <Label className="block text-sm font-medium text-gray-600 mb-1">المصدر</Label>
+              <p className="text-gray-800 font-medium">{message.Sources?.NomSource || message.AutreLibelleSource}</p>
             </div>
-            <div>
-              <Label className="text-muted-foreground">الشعبة</Label>
-              <p className="font-medium mt-1">{message.Filieres?.Libelle || "---"}</p>
-            </div>
-            <div>
-              <Label className="text-muted-foreground">طبيعة المراسلة </Label>
-              <p className="font-medium mt-1">{message.TypeMessageries?.Libelle || "---"}</p>
-            </div>
-            <div>
-              <Label className="text-muted-foreground">رقم المضمون</Label>
-              <p className="font-medium mt-1">{message.CodeBarre}</p>
-            </div>
-            <div>
-              <Label className="text-muted-foreground">الموضوع</Label>
+
+            {/* Barcode */}
+            <div className="bg-white p-3 rounded-lg">
+              <Label className="block text-sm font-medium text-gray-600 mb-1">رقم المضمون</Label>
               {isEditing ? (
-                <Input defaultValue={message.Sujet} />
+                <Input
+                  defaultValue={message.CodeBarre}
+                  onChange={(e) => handleChange('CodeBarre', e.target.value)}
+                  className="bg-white border-gray-300 text-gray-800"
+                />
               ) : (
-                <p className="font-medium mt-1">{message.Sujet || "---"}</p>
+                <p className="text-gray-800 font-medium">{message.CodeBarre}</p>
               )}
             </div>
-            <div>
-              <Label className="text-muted-foreground">النائب الموكل</Label>
-              <p className="font-medium mt-1">
+
+            {/* Subject */}
+            <div className="bg-white p-3 rounded-lg">
+              <Label className="block text-sm font-medium text-gray-600 mb-1">الموضوع</Label>
+              {isEditing ? (
+                <Textarea
+                  defaultValue={message.Sujet}
+                  onChange={(e) => handleChange('Sujet', e.target.value)}
+                  className="bg-white border-gray-300 text-gray-800 min-h-[100px]"
+                />
+              ) : (
+                <p className="text-gray-800 font-medium whitespace-pre-line">
+                  {message.Sujet || "---"}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Column 2 */}
+          <div className="space-y-4">
+
+            {/* Prosecutor */}
+            <div className="bg-white p-3 rounded-lg">
+              <Label className="block text-sm font-medium text-gray-600 mb-1">النائب الموكل</Label>
+              <p className="text-gray-800 font-medium">
                 {message.ProsecutorResponsables?.prenom} {message.ProsecutorResponsables?.nom || "---"}
               </p>
             </div>
+
+            {/* Reference */}
+            <div className="bg-white p-3 rounded-lg">
+              <Label className="block text-sm font-medium text-gray-600 mb-1">المرجع</Label>
+              {isEditing ? (
+                <Input
+                  defaultValue={message.CodeReference || ""}
+                  onChange={(e) => handleChange('CodeReference', e.target.value)}
+                  className="bg-white border-gray-300 text-gray-800"
+                />
+              ) : (
+                <p className="text-gray-800 font-medium">{message.CodeReference || "---"}</p>
+              )}
+            </div>
+
+
+            {/* Notes */}
+            <div className="bg-white p-3 rounded-lg">
+              <Label className="block text-sm font-medium text-gray-600 mb-1">ملاحظات</Label>
+              {isEditing ? (
+                <Textarea
+                  defaultValue={message.Remarques || ""}
+                  onChange={(e) => handleChange('Remarques', e.target.value)}
+                  className="bg-white border-gray-300 text-gray-800 min-h-[100px]"
+                />
+              ) : (
+                <p className="text-gray-800 font-medium whitespace-pre-line">
+                  {message.Remarques || "---"}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Column 3 */}
+          <div className="space-y-4">
+            {/* Message Type */}
+            <div className="bg-white p-3 rounded-lg">
+              <Label className="block text-sm font-medium text-gray-600 mb-1">طبيعة المراسلة</Label>
+              <p className="text-gray-800 font-medium">{message.TypeMessageries?.Libelle || "---"}</p>
+            </div>
           </div>
         </CardContent>
+
+        <CardFooter className="bg-white px-6 py-4 rounded-b-lg border-t flex justify-end gap-3">
+          {isEditing ? (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => setIsEditing(false)}
+                className="border-gray-300 text-gray-700 hover:bg-gray-100"
+              >
+                إلغاء
+              </Button>
+              <Button
+                onClick={handleSaveChanges}
+                className=" text-white"
+
+                variant="default"
+              >
+                حفظ التغييرات
+              </Button>
+            </>
+          ) : (
+            <Button
+              onClick={() => setIsEditing(true)}
+              variant="default"
+              className=""
+            >
+              تعديل
+            </Button>
+          )}
+        </CardFooter>
       </Card>
 
       {/* Tab System */}
@@ -233,24 +408,49 @@ export default function MessageDetailPage() {
               <CardTitle>النتيجة</CardTitle>
             </CardHeader>
             <CardContent>
-              {isEditing ? (
+              {isResultEditing ? (
                 <Textarea
                   className="min-h-[150px]"
-                  defaultValue={message.Resultats[0]?.Libelle || ""}
+                  value={resultat || ""}
+                  onChange={(e) => setResultat(e.target.value)}
                   placeholder=" النتيجة..."
                 />
               ) : (
                 <div className="prose max-w-none">
-                  <p className="whitespace-pre-line">{message.Resultats[0]?.Libelle || "لا يوجد محتوى"}</p>
+                  <p className="whitespace-pre-line">{message.resultat || "لا يوجد محتوى"}</p>
                 </div>
               )}
             </CardContent>
-            {isEditing && (
-              <CardContent className="border-t pt-4 flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setIsEditing(false)}>إلغاء</Button>
-                <Button onClick={handleUpdateMessage}>حفظ التغييرات</Button>
-              </CardContent>
-            )}
+            <CardFooter className="bg-white px-6 py-4 rounded-b-lg border-t flex justify-end gap-3">
+              {isResultEditing ? (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsResultEditing(false)}
+                    className="border-gray-300 text-gray-700 hover:bg-gray-100"
+                  >
+                    إلغاء
+                  </Button>
+                  <Button
+                    onClick={handleUpdateResultat}
+                    className=" text-white"
+
+                    variant="default"
+                  >
+                    حفظ التغييرات
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  onClick={() => setIsResultEditing(true)}
+                  variant="default"
+                  className=""
+                >
+                  تعديل
+                </Button>
+              )}
+            </CardFooter>
+
           </Card>
         </TabsContent>
 
@@ -322,52 +522,8 @@ export default function MessageDetailPage() {
 
         {/* Etude */}
         <TabsContent value="etude" className="pt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>حالة الدراسة</CardTitle>
-              <CardDescription>تتبع حالة دراسة هذه الرسالة</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label>الحالة</Label>
-                    <Select defaultValue={message.Etude?.Statut || "pending"}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="الحالة" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="pending">قيد الدراسة</SelectItem>
-                        <SelectItem value="completed">مكتمل</SelectItem>
-                        <SelectItem value="rejected">مرفوض</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>تاريخ الانتهاء</Label>
-                    <Input
-                      type="date"
-                      defaultValue={message.Etude?.DateFin ? format(new Date(message.Etude.DateFin), "yyyy-MM-dd") : ""}
-                    />
-                  </div>
-                </div>
+          <EtudeWorkflow message={message} refreshData={setRefresh} />
 
-                <div className="space-y-2">
-                  <Label>ملاحظات الدراسة</Label>
-                  <Textarea
-                    className="min-h-[120px]"
-                    defaultValue={message.Etude?.Notes || ""}
-                    placeholder="أدخل ملاحظات الدراسة..."
-                  />
-                </div>
-
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline">إلغاء</Button>
-                  <Button>حفظ التغييرات</Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
 
         {/* Attachments */}
