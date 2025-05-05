@@ -5,7 +5,7 @@ import { PrismaClient } from '@/generated/prisma/client';
 const prisma = new PrismaClient()
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: any
 ) {
     try {
         const links = await prisma.messagerieLinks.findMany({
