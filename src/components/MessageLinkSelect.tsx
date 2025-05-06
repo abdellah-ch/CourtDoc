@@ -29,13 +29,16 @@ export function MessageLinkSelect({
   const inputRef = useRef<HTMLInputElement>(null)
 
   const filteredMessages = useMemo(() => {
-    return messages
-      .filter(msg => 
-        !disabledIds.includes(msg.IdMessagerie) &&
-        (msg.NumeroMessagerie.includes(searchTerm) || 
-         msg.Sujet.includes(searchTerm))
-      )
-      .slice(0, 6) // Limit to 6 items
+    return (messages || []) // Handle undefined/null messages
+      .filter(msg => {
+        if (!msg) return false; // Skip null/undefined messages
+        return (
+          !disabledIds?.includes(msg.IdMessagerie) &&
+          (msg.NumeroMessagerie?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
+            msg.Sujet?.toLowerCase()?.includes(searchTerm.toLowerCase()))
+        )
+      })
+      .slice(0, 6)
   }, [messages, searchTerm, disabledIds])
 
   // Get the selected message to display just the number
@@ -45,7 +48,7 @@ export function MessageLinkSelect({
 
   return (
     <Select value={value} onValueChange={onValueChange}>
-      <SelectTrigger dir="rtl" className="cursor-pointer w-full text-right">
+      <SelectTrigger dir="rtl" className="cursor-pointer w-full mt-4 text-right">
         <SelectValue placeholder={placeholder}>
           {selectedMessage ? selectedMessage.NumeroMessagerie : placeholder}
         </SelectValue>
@@ -63,7 +66,7 @@ export function MessageLinkSelect({
             onClick={(e) => e.stopPropagation()}
           />
         </div>
-        
+
         <div dir="rtl" className="max-h-[300px] overflow-y-auto">
           {filteredMessages.length > 0 ? (
             filteredMessages.map(message => (

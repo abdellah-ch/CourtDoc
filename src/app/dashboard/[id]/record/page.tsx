@@ -16,14 +16,14 @@ export default function FiliereArchivePage({ params }: any) {
     const [filteredData, setFilteredData] = useState<any[]>([]);
     const [yearFilter, setYearFilter] = useState<string>(new Date().getFullYear().toString());
     const [statusFilter, setStatusFilter] = useState<string>("all");
-    const [refresh,setRefresh] = useState<boolean>(false);
+    const [refresh, setRefresh] = useState<boolean>(false);
     useEffect(() => {
         const IdFilier = id?.toString();
         if (IdFilier) {
             fetchFiliereLibelle(parseInt(IdFilier), setLibelle);
             fetchMessageriesByFiliere(parseInt(IdFilier), setMessageries);
         }
-    }, [id,refresh]);
+    }, [id, refresh]);
 
     useEffect(() => {
         let result = [...messageries];
@@ -31,7 +31,7 @@ export default function FiliereArchivePage({ params }: any) {
         // Apply year filter
         if (yearFilter !== "all") {
             result = result.filter(m =>
-                new Date(m.DateMessage).getFullYear().toString() === yearFilter
+                new Date(m.DateArrivee).getFullYear().toString() === yearFilter
             );
         }
 
@@ -57,8 +57,8 @@ export default function FiliereArchivePage({ params }: any) {
         return { value: year.toString(), label: year.toString() };
     });
 
-    console.log("messageries",messageries);
-     
+    console.log("messageries", messageries);
+
     return (
         <div className="p-6 space-y-4">
             <div className="flex justify-between items-center">
@@ -70,7 +70,7 @@ export default function FiliereArchivePage({ params }: any) {
                     <Button
                         variant="outline"
                         className="gap-2"
-                        onClick={()=>{}}
+                        onClick={() => { }}
                     >
                         <Download className="h-4 w-4" />
                         تصدير Excel

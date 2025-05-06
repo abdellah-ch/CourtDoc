@@ -4,7 +4,7 @@ import { PrismaClient } from "@/generated/prisma/client";
 const prisma = new PrismaClient()
 
 
-export async function GET(req:NextRequest, { params }: { params: Promise<{ IdMessagerie: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ IdMessagerie: string }> }) {
     const { IdMessagerie } = await params
 
     // console.log("ghoiheihoihodhfioezhifhzeoihfiezh",idMessagerie);
@@ -14,17 +14,19 @@ export async function GET(req:NextRequest, { params }: { params: Promise<{ IdMes
         },
         include: {
             CodeFilieres: true,
-            ProsecutorResponsables: true,
             Sources: true,
             TypeMessageries: true,
             Filieres: true,
-            Etude: true,
-            Reponses: {
-                include:{
-                    Sources:true
-                } 
+            Etude: {
+                include: {
+                    ProsecutorResponsables: true
+                }
             },
-            Resultats: true,
+            Reponses: {
+                include: {
+                    Sources: true
+                }
+            },
         },
     });
 

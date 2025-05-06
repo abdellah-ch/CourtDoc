@@ -1,26 +1,25 @@
 import { NextResponse } from 'next/server';
-import {PrismaClient} from '@/generated/prisma/client';
+import { PrismaClient } from '@/generated/prisma/client';
 
 const prisma = new PrismaClient()
 
-
 export async function PATCH(
   request: Request,
-  { params }: any 
+  { params }: any
 ) {
-  
-
   try {
-    const { DateRetour, Etude } = await request.json();
-    
+    const { DateRetour, decision } = await request.json();
+
     const updatedEtude = await prisma.etude.update({
       where: { IdEtude: Number(params.id) },
       data: {
         DateRetour: DateRetour ? new Date(DateRetour) : null,
-        Etude,
+        Etude: false, // Always false when returning
+        decision
       },
       include: {
-        Messageries: true
+        Messageries: true,
+        ProsecutorResponsables: true
       }
     });
 

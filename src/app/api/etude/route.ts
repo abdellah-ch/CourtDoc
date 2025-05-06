@@ -1,20 +1,23 @@
 import { NextResponse } from 'next/server';
-import {PrismaClient} from '@/generated/prisma/client';
+import { PrismaClient } from '@/generated/prisma/client';
 
 const prisma = new PrismaClient()
+
 // Create new study record
 export async function POST(request: Request) {
   try {
-    const { IdMessagerie, DateEtude, Etude } = await request.json();
-    
+    const { IdMessagerie, DateEtude, IdProsecutor } = await request.json();
+
     const newEtude = await prisma.etude.create({
       data: {
         IdMessagerie,
         DateEtude: new Date(DateEtude),
-        Etude,
+        Etude: true, // Always true when creating new study
+        IdProsecutor: IdProsecutor ? Number(IdProsecutor) : null
       },
       include: {
-        Messageries: true
+        Messageries: true,
+        ProsecutorResponsables: true
       }
     });
 
@@ -27,5 +30,3 @@ export async function POST(request: Request) {
     );
   }
 }
-
-// Update study record

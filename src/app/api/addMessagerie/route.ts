@@ -15,7 +15,6 @@ export async function POST(request: Request) {
       statut,
       idType,
       IdTypeSource,
-      idProsecutor,
       idCode,
       idSource,
       AutreLibelleSource
@@ -52,15 +51,15 @@ export async function POST(request: Request) {
     });
 
     const nextNumeroOrdre = lastMessagerie
-      ? parseInt(lastMessagerie.NumeroOrdre) + 1
+      ? parseInt(lastMessagerie.NumeroOrdre || "") + 1
       : 1;
 
     // 3. Generate CodeComplet (format: year/codeFiliere/numeroOrdre)
     const codeComplet = `${currentYear}/${codeFiliereValue}/${nextNumeroOrdre.toString().padStart(3, '0')}`;
 
     // 4. Determine NumeroMessagerie based on idType
-    const finalNumeroMessagerie = parseInt(idType) === 1 
-      ? NumeroMessagerie 
+    const finalNumeroMessagerie = parseInt(idType) === 1
+      ? NumeroMessagerie
       : codeComplet;
 
     // 5. Create the new messagerie with all fields
@@ -76,7 +75,6 @@ export async function POST(request: Request) {
         Remarques: remarques,
         Statut: statut,
         IdType: parseInt(idType),
-        IdProsecutor: idProsecutor ? parseInt(idProsecutor) : null,
         IdCode: parseInt(idCode),
         IdSource: idSource ? parseInt(idSource) : null,
         AutreLibelleSource: AutreLibelleSource,

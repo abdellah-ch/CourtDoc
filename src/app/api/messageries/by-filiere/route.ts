@@ -19,13 +19,14 @@ export async function GET(req: NextRequest) {
                 IdFiliere: idFiliere,
                 IsDeleted: false
             },
+
             include: {
                 TypeMessageries: {
                     select: {
                         Libelle: true
                     }
                 },
-                Reponses : true,
+                Reponses: true,
                 Sources: {
                     select: {
                         NomSource: true
@@ -36,28 +37,21 @@ export async function GET(req: NextRequest) {
                         Libelle: true
                     }
                 },
-                ProsecutorResponsables: {
-                    select: {
-                        nom: true,
-                        prenom: true
-                    }
-                },
                 CodeFilieres: {
                     select: {
                         Valeur: true
                     }
                 }
             },
-            orderBy: {
-                DateMessage: 'desc'
-            }
+
         });
+        messageries.sort((a: any, b: any) => parseInt(b.NumeroOrdre) - parseInt(a.NumeroOrdre));
 
         return NextResponse.json(messageries);
     } catch (error) {
         console.error("Error fetching messageries:", error);
         return NextResponse.json(
-            { message: "Internal server error" }, 
+            { message: "Internal server error" },
             { status: 500 }
         );
     }

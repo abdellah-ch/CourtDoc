@@ -50,7 +50,7 @@ import { toast } from "sonner";
 import { Messageries } from "@/generated/prisma";
 import { EtudeWorkflow } from "@/components/EtudeWorkflow";
 import { MessageLinksManager } from "@/components/MessageLinksManager";
-import { fetchMessageriesByFiliere } from "@/lib/FetchMessagerieInfo";
+import { fetchMessageriesByFiliere, fetchResponsables } from "@/lib/FetchMessagerieInfo";
 
 export default function MessageDetailPage() {
   const { idMessagerie } = useParams();
@@ -65,6 +65,7 @@ export default function MessageDetailPage() {
   const [editedData, setEditedData] = useState<Partial<Messageries>>({});
   const [resultat, setResultat] = useState("");
 
+  const [responsable, setResponsable] = useState([]);
   const [messageries, setMessageries] = useState<any[]>([]);
   const params = useParams();
   console.log(params.id);
@@ -112,7 +113,9 @@ export default function MessageDetailPage() {
         toast.error("error", err)
       })
   };
+
   useEffect(() => {
+    fetchResponsables(setResponsable)
     if (params.id) {
       fetchMessageriesByFiliere(parseInt(params.id.toString()), setMessageries);
     }
@@ -308,7 +311,7 @@ export default function MessageDetailPage() {
             <div className="bg-white p-3 rounded-lg">
               <Label className="block text-sm font-medium text-gray-600 mb-1">النائب الموكل</Label>
               <p className="text-gray-800 font-medium">
-                {message.ProsecutorResponsables?.prenom} {message.ProsecutorResponsables?.nom || "---"}
+                {message.ProsecutorResponsables?.prenom} {message.ProsecutorResponsables?.nom || message.prosecutor}
               </p>
             </div>
 
@@ -528,7 +531,7 @@ export default function MessageDetailPage() {
 
         {/* Etude */}
         <TabsContent value="etude" className="pt-6">
-          <EtudeWorkflow message={message} refreshData={setRefresh} />
+          <EtudeWorkflow message={message} refreshData={setRefresh} prosecutors={responsable} />
 
         </TabsContent>
 

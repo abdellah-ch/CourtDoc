@@ -65,7 +65,7 @@ interface Messagerie {
 }
 
 interface DataTableProps<TData> {
-  setRefresh : (item:boolean)=>void
+  setRefresh: (item: boolean) => void
   data: any[]
 }
 
@@ -76,18 +76,18 @@ export function MessageriesTable<TData extends Messagerie>({
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [IdDeleteMessagerie,setIdDeleteMessagerie] = useState<number>(0)
+  const [IdDeleteMessagerie, setIdDeleteMessagerie] = useState<number>(0)
   const { id } = useParams(); // Gets [id] from the URL
-  const handleDelete = (Id:number) => {
+  const handleDelete = (Id: number) => {
     // Your delete logic here
-    console.log("Item deleted",Id);
+    console.log("Item deleted", Id);
     setIsDeleteOpen(false);
-    fetch(`/api/delete/${Id}`).then(()=>{
+    fetch(`/api/delete/${Id}`).then(() => {
       console.log("");
       toast.success("تم")
       setRefresh(true)
-    }).catch((err)=>{
-      toast.error("error",err)
+    }).catch((err) => {
+      toast.error("error", err)
     })
   };
   const columns: ColumnDef<TData>[] = [
@@ -281,6 +281,14 @@ export function MessageriesTable<TData extends Messagerie>({
       />
       <div className="flex items-center py-2 gap-4 flex-wrap justify-between">
         <div className="flex items-center py-4 gap-4">
+          <Input
+            placeholder="ابحث الرقم الترتيبي	 ..."
+            value={(table.getColumn("NumeroOrdre")?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              table.getColumn("NumeroOrdre")?.setFilterValue(event.target.value)
+            }
+            className="max-w-xs"
+          />
           <Input
             placeholder="ابحث برقم الإرسالية..."
             value={(table.getColumn("NumeroMessagerie")?.getFilterValue() as string) ?? ""}

@@ -27,15 +27,19 @@ model CodeFilieres {
 }
 
 model Etude {
-  IdEtude      Int         @id(map: "PK__Etude__23BA6831E1880F75") @default(autoincrement())
-  Etude        Boolean?
-  DateEtude    DateTime    @db.Date
-  DateRetour   DateTime?   @db.Date
-  IdMessagerie Int
-  Messageries  Messageries @relation(fields: [IdMessagerie], references: [IdMessagerie], onUpdate: NoAction, map: "FK__Etude__IdMessage__5EBF139D")
+  IdEtude                Int                     @id(map: "PK__Etude__23BA6831E1880F75") @default(autoincrement())
+  Etude                  Boolean?
+  DateEtude              DateTime                @db.Date
+  DateRetour             DateTime?               @db.Date
+  IdMessagerie           Int
+  IdProsecutor           Int?
+  decision               String?                 @db.NVarChar(100)
+  Messageries            Messageries             @relation(fields: [IdMessagerie], references: [IdMessagerie], onUpdate: NoAction, map: "FK__Etude__IdMessage__5EBF139D")
+  ProsecutorResponsables ProsecutorResponsables? @relation(fields: [IdProsecutor], references: [IdResponsable], onDelete: NoAction, onUpdate: NoAction, map: "FK_Etude_ProsecutorResponsables")
 
   @@index([DateEtude, DateRetour], map: "IX_Etude_DateEtude_DateRetour")
   @@index([IdMessagerie], map: "IX_Etude_IdMessagerie")
+  @@index([IdProsecutor], map: "IX_Etude_IdProsecutor")
 }
 
 model Filieres {
@@ -60,46 +64,43 @@ model Filieres {
 }
 
 model Messageries {
-  IdMessagerie                                                    Int                     @id(map: "PK__Messager__89D73AEE80FE574E") @default(autoincrement())
-  NumeroOrdre                                                     String                  @db.NVarChar(100)
-  CodeBarre                                                       String                  @db.NVarChar(100)
-  NumeroMessagerie                                                String                  @db.NVarChar(100)
-  DateMessage                                                     DateTime                @db.Date
-  DateArrivee                                                     DateTime?               @db.Date
-  Sujet                                                           String                  @db.NVarChar(255)
-  Remarques                                                       String?                 @db.NVarChar(Max)
-  Statut                                                          String                  @db.NVarChar(100)
+  IdMessagerie                                                    Int               @id(map: "PK__Messager__89D73AEE80FE574E") @default(autoincrement())
+  NumeroOrdre                                                     String?           @db.NVarChar(100)
+  CodeBarre                                                       String?           @db.NVarChar(100)
+  NumeroMessagerie                                                String?           @db.NVarChar(100)
+  DateMessage                                                     DateTime?         @db.Date
+  DateArrivee                                                     DateTime?         @db.Date
+  Sujet                                                           String?           @db.NVarChar(255)
+  Remarques                                                       String?           @db.NVarChar(Max)
+  Statut                                                          String?           @db.NVarChar(100)
   IdType                                                          Int?
-  IdProsecutor                                                    Int?
-  IdCode                                                          Int
-  AddedBy                                                         String?                 @db.NVarChar(100)
-  AddedDate                                                       DateTime?               @default(now(), map: "DF__Messageri__Added__0A9D95DB") @db.DateTime
-  UpdatedBy                                                       String?                 @db.NVarChar(100)
-  UpdatedDate                                                     DateTime?               @db.DateTime
-  DeletedBy                                                       String?                 @db.NVarChar(100)
-  DeletedDate                                                     DateTime?               @db.DateTime
+  IdCode                                                          Int?
+  AddedBy                                                         String?           @db.NVarChar(100)
+  AddedDate                                                       DateTime?         @default(now(), map: "DF__Messageri__Added__0A9D95DB") @db.DateTime
+  UpdatedBy                                                       String?           @db.NVarChar(100)
+  UpdatedDate                                                     DateTime?         @db.DateTime
+  DeletedBy                                                       String?           @db.NVarChar(100)
+  DeletedDate                                                     DateTime?         @db.DateTime
   IdSource                                                        Int?
-  IsDeleted                                                       Boolean?                @default(false, map: "DF__Messageri__IsDel__0B91BA14")
+  IsDeleted                                                       Boolean?          @default(false, map: "DF__Messageri__IsDel__0B91BA14")
   IdDocument                                                      Int?
   IdFiliere                                                       Int?
-  CodeReference                                                   String?                 @db.NVarChar(100)
-  AutreLibelleSource                                              String?                 @db.NVarChar(255)
-  resultat                                                        String?                 @db.NVarChar(300)
+  CodeReference                                                   String?           @db.NVarChar(100)
+  AutreLibelleSource                                              String?           @db.NVarChar(255)
+  resultat                                                        String?           @db.NVarChar(300)
+  prosecutor                                                      String?           @db.NVarChar(100)
   Etude                                                           Etude[]
-  MessagerieLinks_MessagerieLinks_IdMessagerieSourceToMessageries MessagerieLinks[]       @relation("MessagerieLinks_IdMessagerieSourceToMessageries")
-  MessagerieLinks_MessagerieLinks_IdMessagerieCibleToMessageries  MessagerieLinks[]       @relation("MessagerieLinks_IdMessagerieCibleToMessageries")
-  CodeFilieres                                                    CodeFilieres            @relation(fields: [IdCode], references: [IdCode], onUpdate: NoAction, map: "FK__Messageri__IdCod__5535A963")
-  ProsecutorResponsables                                          ProsecutorResponsables? @relation(fields: [IdProsecutor], references: [IdResponsable], onDelete: NoAction, onUpdate: NoAction, map: "FK__Messageri__IdPro__5441852A")
-  Sources                                                         Sources?                @relation(fields: [IdSource], references: [IdSource], onDelete: NoAction, onUpdate: NoAction, map: "FK__Messageri__IdSou__5629CD9C")
-  TypeMessageries                                                 TypeMessageries?        @relation(fields: [IdType], references: [IdType], onDelete: NoAction, onUpdate: NoAction, map: "FK__Messageri__IdTyp__534D60F1")
-  Filieres                                                        Filieres?               @relation(fields: [IdFiliere], references: [IdFiliere], onDelete: NoAction, onUpdate: NoAction, map: "FK_Messageries_Filieres")
+  MessagerieLinks_MessagerieLinks_IdMessagerieSourceToMessageries MessagerieLinks[] @relation("MessagerieLinks_IdMessagerieSourceToMessageries")
+  MessagerieLinks_MessagerieLinks_IdMessagerieCibleToMessageries  MessagerieLinks[] @relation("MessagerieLinks_IdMessagerieCibleToMessageries")
+  CodeFilieres                                                    CodeFilieres?     @relation(fields: [IdCode], references: [IdCode], onDelete: NoAction, onUpdate: NoAction, map: "FK__Messageri__IdCod__5535A963")
+  Sources                                                         Sources?          @relation(fields: [IdSource], references: [IdSource], onDelete: NoAction, onUpdate: NoAction, map: "FK__Messageri__IdSou__5629CD9C")
+  TypeMessageries                                                 TypeMessageries?  @relation(fields: [IdType], references: [IdType], onDelete: NoAction, onUpdate: NoAction, map: "FK__Messageri__IdTyp__534D60F1")
+  Filieres                                                        Filieres?         @relation(fields: [IdFiliere], references: [IdFiliere], onDelete: NoAction, onUpdate: NoAction, map: "FK_Messageries_Filieres")
   Reponses                                                        Reponses[]
-  Resultats                                                       Resultats[]
 
   @@index([DateMessage], map: "IX_Messageries_DateMessage")
   @@index([IdCode], map: "IX_Messageries_IdCode")
   @@index([IdDocument], map: "IX_Messageries_IdDocument")
-  @@index([IdProsecutor], map: "IX_Messageries_IdProsecutor")
   @@index([IdType], map: "IX_Messageries_IdType")
   @@index([IsDeleted], map: "IX_Messageries_IsDeleted")
   @@index([NumeroOrdre], map: "IX_Messageries_NumeroOrdre")
@@ -109,17 +110,17 @@ model Messageries {
 }
 
 model ProsecutorResponsables {
-  IdResponsable Int           @id(map: "PK__Prosecut__CCF9B55092788729") @default(autoincrement())
-  prenom        String        @db.NVarChar(100)
-  nom           String        @db.NVarChar(100)
-  AddedBy       String?       @db.NVarChar(100)
-  AddedDate     DateTime?     @default(now(), map: "DF__Prosecuto__Added__02084FDA") @db.DateTime
-  UpdatedBy     String?       @db.NVarChar(100)
-  UpdatedDate   DateTime?     @db.DateTime
-  DeletedBy     String?       @db.NVarChar(100)
-  DeletedDate   DateTime?     @db.DateTime
-  IsDeleted     Boolean?      @default(false, map: "DF__Prosecuto__IsDel__02FC7413")
-  Messageries   Messageries[]
+  IdResponsable Int       @id(map: "PK__Prosecut__CCF9B55092788729") @default(autoincrement())
+  prenom        String    @db.NVarChar(100)
+  nom           String    @db.NVarChar(100)
+  AddedBy       String?   @db.NVarChar(100)
+  AddedDate     DateTime? @default(now(), map: "DF__Prosecuto__Added__02084FDA") @db.DateTime
+  UpdatedBy     String?   @db.NVarChar(100)
+  UpdatedDate   DateTime? @db.DateTime
+  DeletedBy     String?   @db.NVarChar(100)
+  DeletedDate   DateTime? @db.DateTime
+  IsDeleted     Boolean?  @default(false, map: "DF__Prosecuto__IsDel__02FC7413")
+  Etude         Etude[]
 
   @@index([IsDeleted], map: "IX_ProsecutorResponsables_IsDeleted")
   @@index([nom, prenom], map: "IX_ProsecutorResponsables_NomPrenom")
@@ -145,23 +146,6 @@ model Reponses {
   @@index([DateReponse], map: "IX_Reponses_DateReponse")
   @@index([IdMessagerie], map: "IX_Reponses_IdMessagerie")
   @@index([IdSource], map: "IX_Reponses_IdSource")
-}
-
-model Resultats {
-  IdResultat   Int         @id(map: "PK__Resultat__8DAFBE8DA9B243CD") @default(autoincrement())
-  Libelle      String      @db.NVarChar(100)
-  IdMessagerie Int
-  AddedBy      String?     @db.NVarChar(100)
-  AddedDate    DateTime?   @default(now(), map: "DF__Resultats__Added__1AD3FDA4") @db.DateTime
-  UpdatedBy    String?     @db.NVarChar(100)
-  UpdatedDate  DateTime?   @db.DateTime
-  DeletedBy    String?     @db.NVarChar(100)
-  DeletedDate  DateTime?   @db.DateTime
-  IsDeleted    Boolean?    @default(false, map: "DF__Resultats__IsDel__1BC821DD")
-  Messageries  Messageries @relation(fields: [IdMessagerie], references: [IdMessagerie], onUpdate: NoAction, map: "FK__Resultats__IdMes__6383C8BA")
-
-  @@index([IdMessagerie], map: "IX_Resultats_IdMessagerie")
-  @@index([Libelle], map: "IX_Resultats_Libelle")
 }
 
 model Roles {
@@ -282,4 +266,30 @@ model MessagerieLinks {
   @@index([DateLiaison], map: "IX_MessagerieLinks_DateLiaison")
   @@index([IdMessagerieSource], map: "IX_MessagerieLinks_Source")
   @@index([IdMessagerieCible], map: "IX_MessagerieLinks_Target")
+}
+
+model sysdiagrams {
+  name         String @db.NVarChar(128)
+  principal_id Int
+  diagram_id   Int    @id(map: "PK__sysdiagr__C2B05B6143AB7401") @default(autoincrement())
+  version      Int?
+  definition   Bytes?
+
+  @@unique([principal_id, name], map: "UK_principal_name")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model temp {
+  NumeroOrdre        Int?    @db.SmallInt
+  IdType             String? @db.NVarChar(50)
+  DateMessage        String? @db.NVarChar(50)
+  NumeroMessagerie   String? @db.NVarChar(50)
+  DateArrivee        String? @db.VarChar(Max)
+  AutreLibelleSource String? @db.NVarChar(Max)
+  Sujet              String? @db.NVarChar(500)
+  resultat           String? @db.NVarChar(500)
+  Status             String? @db.NVarChar(50)
+  prosecutor         String? @db.NVarChar(50)
+
+  @@ignore
 }

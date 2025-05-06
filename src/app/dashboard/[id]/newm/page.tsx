@@ -47,7 +47,7 @@ const formSchema = z.object({
   idProsecutor: z.string().optional(),
   idCode: z.string().min(1, "حقل مطلوب"),
   idSource: z.string().optional(),
-  AutreLibelleSource: z.string().min(1, "حفل مطلوب")
+  AutreLibelleSource: z.string().min(0, "حفل مطلوب")
   // document: z.instanceof(File).optional(),
 });
 
@@ -69,7 +69,6 @@ export default function AddMessagerieForm() {
       statut: "",
       idType: "",
       IdTypeSource: "",
-      idProsecutor: "",
       idCode: "",
       idSource: "",
       AutreLibelleSource: ""
@@ -86,7 +85,8 @@ export default function AddMessagerieForm() {
   const [Availablesources, setAvailableSources] = useState<any[]>([]);
   const [anotherSource, setAnotherSource] = useState<boolean>(false)
 
-  const [responsable, setResponsables] = useState<any>()
+  const [isDisabled, setIsDisabled] = useState<boolean>(false)
+  // const [responsable, setResponsables] = useState<any>()
   const [codeFilieres, setCodeFilieres] = useState<any[]>()
   useEffect(() => {
     fetchMessageTypes(setMessageTypes)
@@ -96,7 +96,7 @@ export default function AddMessagerieForm() {
       fetchCodeFilieres(parseInt(IdFiliere), setCodeFilieres)
     }
     fetchSources(setAllSources)
-    fetchResponsables(setResponsables)
+    // fetchResponsables(setResponsables)
     if (selectedIdTypeSource) {
       console.log("Selected IdTypeSource:", selectedIdTypeSource);
       if (parseInt(selectedIdTypeSource) === 5) {
@@ -115,6 +115,7 @@ export default function AddMessagerieForm() {
   }, [selectedIdTypeSource, selectedSources])
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsDisabled(true)
     // Prepare the data in the correct format
     const messagerieData = {
       ...values,
@@ -464,30 +465,7 @@ export default function AddMessagerieForm() {
 
 
 
-            <FormField
-              control={form.control}
-              name="idProsecutor"
-              render={({ field }) => (
-                <FormItem className="text-right">
-                  <FormLabel> النائب المكلف (إختياري)</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger dir="rtl" className="w-full cursor-pointer">
-                        <SelectValue placeholder="اختر النائب المكلف" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent dir="rtl">
-                      {responsable?.map((prosecutor: any) => (
-                        <SelectItem key={prosecutor.IdResponsable} value={prosecutor.IdResponsable.toString()}>
-                          {prosecutor.prenom} {prosecutor.nom}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
           </div>
 
           <div className="flex justify-end gap-4">
@@ -509,7 +487,7 @@ export default function AddMessagerieForm() {
             >
               إلغاء
             </Button>
-            <Button type="submit" onClick={() => console.log(form.getValues())}>حفظ الإرسالية</Button>
+            <Button type="submit" disabled={isDisabled} onClick={() => console.log(form.getValues())}>حفظ الإرسالية</Button>
           </div>
         </form>
       </Form>
