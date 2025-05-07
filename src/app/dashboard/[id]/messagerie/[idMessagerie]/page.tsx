@@ -235,11 +235,13 @@ export default function MessageDetailPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-end md:justify-start">
+            <div className="flex flex-col gap-1">
+
+              <Label className="text-sm font-medium text-gray-600 block mb-1 mr-2">الحالة</Label>
               {isEditing ? (
                 <div className="min-w-[150px]">
-                  <Label className="text-sm font-medium text-gray-600 block mb-1">الحالة</Label>
                   <Select
+                    dir="rtl"
                     defaultValue={message.Statut}
                     onValueChange={(value) => handleChange('Statut', value)}
                   >
@@ -267,10 +269,27 @@ export default function MessageDetailPage() {
         <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Column 1 */}
           <div className="space-y-4">
-            {/* Source */}
+
             <div className="bg-white p-3 rounded-lg">
+              {/* Source */}
               <Label className="block text-sm font-medium text-gray-600 mb-1">المصدر</Label>
-              <p className="text-gray-800 font-medium">{message.Sources?.NomSource || message.AutreLibelleSource}</p>
+              {
+                isEditing ?
+                  (<div>
+
+                    <Input
+                      defaultValue={message.AutreLibelleSource}
+                      onChange={(e) => handleChange('AutreLibelleSource', e.target.value)}
+                      className="bg-white border-gray-300 text-gray-800"
+                    />
+
+                  </div>) :
+                  (
+                    <div className="bg-white p-3 rounded-lg">
+                      <p className="text-gray-800 font-medium">{message.Sources?.NomSource || message.AutreLibelleSource}</p>
+                    </div>
+                  )
+              }
             </div>
 
             {/* Barcode */}
@@ -310,9 +329,19 @@ export default function MessageDetailPage() {
             {/* Prosecutor */}
             <div className="bg-white p-3 rounded-lg">
               <Label className="block text-sm font-medium text-gray-600 mb-1">النائب الموكل</Label>
-              <p className="text-gray-800 font-medium">
-                {message.ProsecutorResponsables?.prenom} {message.ProsecutorResponsables?.nom || message.prosecutor}
-              </p>
+              {
+                isEditing ? (
+                  <Input
+                    defaultValue={message.prosecutor}
+                    onChange={(e) => handleChange('prosecutor', e.target.value)}
+                    className="bg-white border-gray-300 text-gray-800"
+                  />) :
+                  (<p className="text-gray-800 font-medium">
+                    {message.ProsecutorResponsables?.prenom} {message.ProsecutorResponsables?.nom || message.prosecutor}
+                  </p>
+                  )
+              }
+
             </div>
 
             {/* Reference */}
@@ -352,7 +381,25 @@ export default function MessageDetailPage() {
             {/* Message Type */}
             <div className="bg-white p-3 rounded-lg">
               <Label className="block text-sm font-medium text-gray-600 mb-1">طبيعة المراسلة</Label>
-              <p className="text-gray-800 font-medium">{message.TypeMessageries?.Libelle || "---"}</p>
+              {
+                isEditing ? (<div className="min-w-[150px]">
+                  <Select
+                    dir="rtl"
+                    defaultValue={message.TypeMessageries?.Libelle}
+                    onValueChange={(value) => handleChange('IdType', parseInt(value))}
+                  >
+                    <SelectTrigger className="bg-white border-gray-300 text-gray-800">
+                      {message.TypeMessageries?.Libelle}
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-gray-200">
+                      <SelectItem value="1" className="hover:bg-white">وارد</SelectItem>
+                      <SelectItem value="2" className="hover:bg-white">صادر</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>) : (
+                  <p className="text-gray-800 font-medium">{message.TypeMessageries?.Libelle || "---"}</p>
+                )
+              }
             </div>
           </div>
         </CardContent>
@@ -545,6 +592,6 @@ export default function MessageDetailPage() {
           />
         </TabsContent>
       </Tabs>
-    </div>
+    </div >
   );
 }

@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider = "sqlserver"
-  url      = "sqlserver://localhost:1433;database=CourtDocFlow;username=sa;password=1234;trustServerCertificate=true"
+  url      = "sqlserver://10.30.10.254;database=CourtDocFlow;username=docflow;password=1234;trustServerCertificate=true"
 }
 
 model Cadre {
