@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
     Form,
@@ -43,7 +43,7 @@ type FormData = {
 
 interface MessageFormModalProps {
 
-    setRefresh : (item:boolean)=>void
+    setRefresh : Dispatch<SetStateAction<boolean>>
     idMessagerie: string;
 }
 
@@ -104,7 +104,7 @@ export function MessageFormModal({ setRefresh, idMessagerie }: MessageFormModalP
             body: JSON.stringify(data),
         }).then((res) => {
             toast.success("تمت الاضافة بنجاح")
-            setRefresh(true)
+            setRefresh((prev)=>!prev)
             setIsModalOpen(false)
         }).catch((err) => {
             toast.error(err)

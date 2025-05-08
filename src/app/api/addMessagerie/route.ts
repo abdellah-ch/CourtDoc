@@ -54,8 +54,7 @@ export async function POST(request: Request) {
       ? lastMessagerie.NumeroOrdre  + 1 : 1;
 
     // 3. Generate CodeComplet (format: year/codeFiliere/numeroOrdre)
-    const codeComplet = `${currentYear}/${codeFiliereValue}/${nextNumeroOrdre.toString().padStart(3, '0')}`;
-
+    const codeComplet = `${nextNumeroOrdre.toString().padStart(3, '0')}/${codeFiliereValue}/${currentYear}`
     // 4. Determine NumeroMessagerie based on idType
     const finalNumeroMessagerie = parseInt(idType) === 1
       ? NumeroMessagerie

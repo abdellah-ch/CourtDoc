@@ -155,6 +155,52 @@ export default function AddMessagerieForm() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" method="post">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="statut"
+              render={({ field }) => (
+                <FormItem className="text-right">
+                  <FormLabel>الإنجاز</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger dir="rtl" className="w-full cursor-pointer">
+                        <SelectValue placeholder="الإنجاز" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent dir="rtl" >
+                      <SelectItem value="منجز">منجز</SelectItem>
+                      <SelectItem value="غير منجز">غير منجز</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="idType"
+              render={({ field }) => (
+                <FormItem className="text-right">
+                  <FormLabel>طبيعة المراسلة</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger dir="rtl" className="w-full cursor-pointer">
+                        <SelectValue placeholder="اختر طبيعة الإرسالية" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent dir="rtl">
+                      {messageTypes.map((type) => (
+                        <SelectItem key={type.IdType} value={type.IdType.toString()}>
+                          {type.Libelle}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             {
               Number(selectedIdTypeMessagerie) === 1 ? (
                 <FormField
@@ -345,52 +391,7 @@ export default function AddMessagerieForm() {
             />
 
             {/* Dropdown Selections */}
-            <FormField
-              control={form.control}
-              name="statut"
-              render={({ field }) => (
-                <FormItem className="text-right">
-                  <FormLabel>الإنجاز</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger dir="rtl" className="w-full cursor-pointer">
-                        <SelectValue placeholder="الإنجاز" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent dir="rtl" >
-                      <SelectItem value="منجز">منجز</SelectItem>
-                      <SelectItem value="غير منجز">غير منجز</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
-            <FormField
-              control={form.control}
-              name="idType"
-              render={({ field }) => (
-                <FormItem className="text-right">
-                  <FormLabel>طبيعة المراسلة</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger dir="rtl" className="w-full cursor-pointer">
-                        <SelectValue placeholder="اختر طبيعة الإرسالية" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent dir="rtl">
-                      {messageTypes.map((type) => (
-                        <SelectItem key={type.IdType} value={type.IdType.toString()}>
-                          {type.Libelle}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <FormField
               control={form.control}

@@ -7,6 +7,7 @@ import { format } from "date-fns"
 
 type MessageLinkItem = {
   IdMessagerie: number
+  NumeroOrdre: number
   NumeroMessagerie: string
   Sujet: string
   DateMessage: Date | string
@@ -29,19 +30,18 @@ export function MessageLinkSelect({
   const inputRef = useRef<HTMLInputElement>(null)
 
   const filteredMessages = useMemo(() => {
-    return (messages || []) // Handle undefined/null messages
+    if (!searchTerm) return (messages || []).filter(msg => !disabledIds?.includes(msg.IdMessagerie)).slice(0, 6);
+    
+    return (messages || [])
       .filter(msg => {
-        if (!msg) return false; // Skip null/undefined messages
-        return (
-          !disabledIds?.includes(msg.IdMessagerie) &&
-          (msg.NumeroMessagerie?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
-            msg.Sujet?.toLowerCase()?.includes(searchTerm.toLowerCase()))
-        )
+        if (!msg) return false;
+        // Exact match comparison
+        return String(msg.NumeroOrdre) === searchTerm && 
+               !disabledIds?.includes(msg.IdMessagerie);
       })
       .slice(0, 6)
   }, [messages, searchTerm, disabledIds])
 
-  // Get the selected message to display just the number
   const selectedMessage = useMemo(() => {
     return messages.find(msg => msg.IdMessagerie.toString() === value)
   }, [value, messages])
@@ -50,7 +50,7 @@ export function MessageLinkSelect({
     <Select value={value} onValueChange={onValueChange}>
       <SelectTrigger dir="rtl" className="cursor-pointer w-full mt-4 text-right">
         <SelectValue placeholder={placeholder}>
-          {selectedMessage ? selectedMessage.NumeroMessagerie : placeholder}
+          {selectedMessage ? `#${selectedMessage.NumeroOrdre}` : placeholder}
         </SelectValue>
       </SelectTrigger>
       <SelectContent className="p-0">
@@ -58,12 +58,18 @@ export function MessageLinkSelect({
           <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             ref={inputRef}
-            placeholder="ابحث برقم أو موضوع المراسلة"
+            placeholder="ابحث بالرقم الترتيبي (مطابقة كاملة)"
             dir="rtl"
-            className="pl-8 pr-3 py-1 h-9 text-sm "
+            className="pl-8 pr-3 py-1 h-9 text-sm"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === '' || /^\d*$/.test(value)) {
+                setSearchTerm(value);
+              }
+            }}
             onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
           />
         </div>
 
@@ -76,8 +82,11 @@ export function MessageLinkSelect({
                 className="cursor-pointer py-2 px-3 text-right"
               >
                 <div className="flex flex-col">
-                  <span className="font-medium">{message.NumeroMessagerie}</span>
-                  <span className="text-sm text-muted-foreground truncate">
+                  <span className="font-medium">#{message.NumeroOrdre}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {message.NumeroMessagerie}
+                  </span>
+                  <span className="text-xs text-muted-foreground truncate">
                     {message.Sujet}
                   </span>
                   <span className="text-xs text-muted-foreground">
@@ -88,7 +97,7 @@ export function MessageLinkSelect({
             ))
           ) : (
             <div className="py-3 text-center text-sm text-muted-foreground">
-              {searchTerm ? "لا توجد نتائج" : "لا توجد مراسلات متاحة"}
+              {searchTerm ? "لا توجد نتائج مطابقة" : "أدخل الرقم الترتيبي للبحث"}
             </div>
           )}
         </div>

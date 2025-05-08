@@ -548,6 +548,7 @@ export default function MessageDetailPage() {
                                 e.stopPropagation();
                                 // Delete functionality would go here
                                 setIdDeleteReponse(response.IdReponse)
+                                setRefresh((prev)=>!prev)
                                 setIsDeleteOpen(true)
                               }}
                               variant="ghost" size="sm" className="h-8 gap-1">
