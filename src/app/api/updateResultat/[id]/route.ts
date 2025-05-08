@@ -13,7 +13,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
             IdMessagerie:Number(id)
         },
         data:{
-            resultat
+            Resultat:resultat
         }
     })
         console.log(updatedData);
