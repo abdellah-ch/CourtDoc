@@ -57,7 +57,7 @@ export default function FiliereArchivePage({ params }: any) {
         return { value: year.toString(), label: year.toString() };
     });
 
-    console.log("messageries", messageries);
+    // console.log("messageries", messageries);
 
     return (
         <div className="p-6 space-y-4">

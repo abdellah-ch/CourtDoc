@@ -47,7 +47,10 @@ const formSchema = z.object({
   idProsecutor: z.string().optional(),
   idCode: z.string().min(1, "حقل مطلوب"),
   idSource: z.string().optional(),
-  AutreLibelleSource: z.string().min(0, "حفل مطلوب")
+  idSourceDestination: z.string().optional(),
+  AutreLibelleSource: z.string().min(0, "حفل مطلوب"),
+  AutreLibelleDestination: z.string().optional(),
+  IdTypeDestination:z.string().optional()
   // document: z.instanceof(File).optional(),
 });
 
@@ -69,6 +72,7 @@ export default function AddMessagerieForm() {
       statut: "",
       idType: "",
       IdTypeSource: "",
+      IdTypeDestination:"",
       idCode: "",
       idSource: "",
       AutreLibelleSource: ""
@@ -77,14 +81,17 @@ export default function AddMessagerieForm() {
 
 
   const selectedIdTypeSource = form.watch("IdTypeSource");
+  const selectedIdTypeDestination = form.watch("IdTypeDestination");
   const selectedIdTypeMessagerie = form.watch("idType")
   const [selectedSources, setSelectedSources] = useState<string>("")
   const [messageTypes, setMessageTypes] = useState<any[]>([])
   const [filiereLibelle, setFiliereLibelle] = useState<string>("")
   const [allSources, setAllSources] = useState<any>()
   const [Availablesources, setAvailableSources] = useState<any[]>([]);
+  
+  const [AvailableDestinations, setAvailableDestinations] = useState<any[]>([]);
   const [anotherSource, setAnotherSource] = useState<boolean>(false)
-
+  const [anotherDestination,setAnotherDestination] = useState<boolean>(false)
   const [isDisabled, setIsDisabled] = useState<boolean>(false)
   // const [responsable, setResponsables] = useState<any>()
   const [codeFilieres, setCodeFilieres] = useState<any[]>()
@@ -98,7 +105,7 @@ export default function AddMessagerieForm() {
     fetchSources(setAllSources)
     // fetchResponsables(setResponsables)
     if (selectedIdTypeSource) {
-      console.log("Selected IdTypeSource:", selectedIdTypeSource);
+      // console.log("Selected IdTypeSource:", selectedIdTypeSource);
       if (parseInt(selectedIdTypeSource) === 5) {
         setAnotherSource(true)
       } else {
@@ -112,7 +119,23 @@ export default function AddMessagerieForm() {
 
     }
 
-  }, [selectedIdTypeSource, selectedSources])
+    if (selectedIdTypeDestination) {
+      console.log(selectedIdTypeDestination)
+      // console.log("Selected IdTypeSource:", selectedIdTypeSource);
+      if (parseInt(selectedIdTypeDestination) === 5) {
+        setAnotherDestination(true)
+      } else {
+        allSources.forEach((element: any) => {
+          if (element.IdTypeSource == selectedIdTypeDestination) {
+            setAvailableDestinations(element.Sources)
+            setAnotherDestination(false)
+          }
+        });
+      }
+
+    }
+
+  }, [selectedIdTypeSource, selectedSources,selectedIdTypeDestination])
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsDisabled(true)
@@ -123,7 +146,7 @@ export default function AddMessagerieForm() {
       dateArrivee: values.dateArrivee ? format(values.dateArrivee, "yyyy-MM-dd") : null,
     };
 
-    console.log("Form submitted with values:", messagerieData);
+    // console.log("Form submitted with values:", messagerieData);
 
     try {
       // Call your createMessagerie function
@@ -136,10 +159,10 @@ export default function AddMessagerieForm() {
       // form.reset();
       // router.push('/messageries');
 
-      console.log("Messagerie created:", response);
+      // console.log("Messagerie created:", response);
       router.push(`/dashboard/${id}/record`)
     } catch (error) {
-      console.error("Error creating messagerie:", error);
+      // console.error("Error creating messagerie:", error);
 
       toast.error(
         error instanceof Error
@@ -202,7 +225,7 @@ export default function AddMessagerieForm() {
               )}
             />
             {
-              Number(selectedIdTypeMessagerie) === 1 ? (
+              (Number(selectedIdTypeMessagerie) === 1 || Number(selectedIdTypeMessagerie) === 3) ? (
                 <FormField
                   control={form.control}
                   name="NumeroMessagerie"
@@ -463,7 +486,82 @@ export default function AddMessagerieForm() {
               />)
             }
 
+            {
+              Number(selectedIdTypeMessagerie) === 3 ? (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="IdTypeDestination"
+                    render={({ field }) => (
+                      <FormItem className="text-right">
+                        <FormLabel>نوع المرسل إليه</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger dir="rtl" className="w-full cursor-pointer">
+                              <SelectValue placeholder=" نوع المرسل إليه" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent dir="rtl">
+                            {allSources?.map((source: any) => (
+                              <SelectItem key={source.IdTypeSource} value={source.IdTypeSource?.toString()}>
+                                {source.Libelle}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
+
+
+                  {
+                    !anotherDestination ? (
+                      <FormField
+                        control={form.control}
+                        name="idSourceDestination"
+                        render={({ field }) => (
+                          <FormItem className="text-right">
+                            <FormLabel>اختر المرسل إليه </FormLabel>
+                            <SearchableSelect
+                              items={AvailableDestinations}
+                              value={field.value || ""}
+                              onValueChange={field.onChange}
+                              placeholder="اختر المرسل إليه"
+                              searchPlaceholder="ابحث عن المرسل إليه..."
+                              renderItem={(eleme: any) => `${eleme.NomSource}`}
+                            />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    ) : (<FormField
+                      control={form.control}
+                      name="AutreLibelleDestination"
+                      render={({ field }) => (
+                        <FormItem className="text-right">
+                          <FormLabel> المرسل إليه</FormLabel>
+                          <FormControl>
+                            <Input {...field}
+                              placeholder="  المرسل إليه"
+                              value={field.value || ""}
+                              onChange={(e) => {
+                                field.onChange(e);
+                                // Clear the other field when typing here
+                                form.setValue('idSourceDestination', '');
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />)
+                  }
+
+                </>
+              ) : null
+            }
 
 
 

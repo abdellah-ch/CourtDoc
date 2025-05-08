@@ -14,9 +14,10 @@ export async function POST(request: Request) {
       remarques,
       statut,
       idType,
-      IdTypeSource,
       idCode,
       idSource,
+      idSourceDestination,
+      AutreLibelleDestination,
       AutreLibelleSource
     } = await request.json();
 
@@ -75,6 +76,8 @@ export async function POST(request: Request) {
         IdType: parseInt(idType),
         IdCode: parseInt(idCode),
         IdSource: idSource ? parseInt(idSource) : null,
+        IdSourceDestination: idSourceDestination ? parseInt(idSourceDestination) : null,
+        AutreLibelleDestination,
         AutreLibelleSource: AutreLibelleSource,
         IdFiliere: idFiliere,
         AddedDate: new Date(),

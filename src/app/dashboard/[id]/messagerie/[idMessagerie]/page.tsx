@@ -68,7 +68,7 @@ export default function MessageDetailPage() {
   const [responsable, setResponsable] = useState([]);
   const [messageries, setMessageries] = useState<any[]>([]);
   const params = useParams();
-  console.log(params.id);
+  // console.log(params.id);
 
 
 
@@ -78,14 +78,14 @@ export default function MessageDetailPage() {
 
   const handleSaveChanges = () => {
     setIsEditing(false);
-    console.log("Changes to save:", editedData);
+    // console.log("Changes to save:", editedData);
     fetch(`/api/updateMessagerie/${idMessagerie}`, {
       method: "PUT",
       body: JSON.stringify({
         editedData
       })
     }).then((res) => {
-      console.log(res);
+      // console.log(res);
       setRefresh((prev) => !prev)
       toast.success("تم التحديث بنجاح")
     })
@@ -96,17 +96,12 @@ export default function MessageDetailPage() {
 
   const handleDelete = (IdDeleteResponse: number) => {
     // Your delete logic here
-    console.log("Item deleted", IdDeleteReponse);
+    // console.log("Item deleted", IdDeleteReponse);
     setIsDeleteOpen(false);
     fetch(`/api/delete/reponse/${IdDeleteReponse}`).then((res) => {
-      console.log("");
-      console.log(res);
-
       res.json()
     })
       .then((data) => {
-        console.log(data);
-
         toast.success("تم")
       })
       .catch((err) => {
@@ -125,7 +120,9 @@ export default function MessageDetailPage() {
     fetch(`/api/messageries/${idMessagerie}`)
       .then(res => res.json())
       .then(data => {
-        setMessage(data); console.log(data);
+        setMessage(data);
+        console.log(data);
+
       });
   }, [idMessagerie, isDeleteOpen, refresh, isResultEditing]);
 
@@ -270,25 +267,28 @@ export default function MessageDetailPage() {
           {/* Column 1 */}
           <div className="space-y-4">
 
+            {/* Message Type */}
             <div className="bg-white p-3 rounded-lg">
-              {/* Source */}
-              <Label className="block text-sm font-medium text-gray-600 mb-1">المصدر</Label>
+              <Label className="block text-sm font-medium text-gray-600 mb-1">طبيعة المراسلة</Label>
               {
-                isEditing ?
-                  (<div>
-
-                    <Input
-                      defaultValue={message.AutreLibelleSource}
-                      onChange={(e) => handleChange('AutreLibelleSource', e.target.value)}
-                      className="bg-white border-gray-300 text-gray-800"
-                    />
-
-                  </div>) :
-                  (
-                    <div className="bg-white p-3 rounded-lg">
-                      <p className="text-gray-800 font-medium">{message.Sources?.NomSource || message.AutreLibelleSource}</p>
-                    </div>
-                  )
+                isEditing ? (<div className="w-full">
+                  <Select
+                    dir="rtl"
+                    defaultValue={message.TypeMessageries?.Libelle}
+                    onValueChange={(value) => handleChange('IdType', parseInt(value))}
+                  >
+                    <SelectTrigger className="bg-white border-gray-300 text-gray-800 w-full">
+                      {message.TypeMessageries?.Libelle}
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-gray-200">
+                      <SelectItem value="1" className="hover:bg-white">وارد</SelectItem>
+                      <SelectItem value="2" className="hover:bg-white">صادر</SelectItem>
+                      <SelectItem value="3" className="hover:bg-white">وارد_صادر</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>) : (
+                  <p className="text-gray-800 font-medium">{message.TypeMessageries?.Libelle || "---"}</p>
+                )
               }
             </div>
 
@@ -306,6 +306,27 @@ export default function MessageDetailPage() {
               )}
             </div>
 
+            {/* Reference */}
+            <div className="bg-white p-3 rounded-lg">
+              <Label className="block text-sm font-medium text-gray-600 mb-1">المرجع</Label>
+              {isEditing ? (
+                <Input
+                  defaultValue={message.CodeReference || ""}
+                  onChange={(e) => handleChange('CodeReference', e.target.value)}
+                  className="bg-white border-gray-300 text-gray-800"
+                />
+              ) : (
+                <p className="text-gray-800 font-medium">{message.CodeReference || "---"}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Column 2 */}
+          <div className="space-y-4">
+
+
+
+
             {/* Subject */}
             <div className="bg-white p-3 rounded-lg">
               <Label className="block text-sm font-medium text-gray-600 mb-1">الموضوع</Label>
@@ -321,43 +342,6 @@ export default function MessageDetailPage() {
                 </p>
               )}
             </div>
-          </div>
-
-          {/* Column 2 */}
-          <div className="space-y-4">
-
-            {/* Prosecutor */}
-            <div className="bg-white p-3 rounded-lg">
-              <Label className="block text-sm font-medium text-gray-600 mb-1">النائب الموكل</Label>
-              {
-                isEditing ? (
-                  <Input
-                    defaultValue={message.prosecutor}
-                    onChange={(e) => handleChange('prosecutor', e.target.value)}
-                    className="bg-white border-gray-300 text-gray-800"
-                  />) :
-                  (<p className="text-gray-800 font-medium">
-                    {message.ProsecutorResponsables?.prenom} {message.ProsecutorResponsables?.nom || message.prosecutor}
-                  </p>
-                  )
-              }
-
-            </div>
-
-            {/* Reference */}
-            <div className="bg-white p-3 rounded-lg">
-              <Label className="block text-sm font-medium text-gray-600 mb-1">المرجع</Label>
-              {isEditing ? (
-                <Input
-                  defaultValue={message.CodeReference || ""}
-                  onChange={(e) => handleChange('CodeReference', e.target.value)}
-                  className="bg-white border-gray-300 text-gray-800"
-                />
-              ) : (
-                <p className="text-gray-800 font-medium">{message.CodeReference || "---"}</p>
-              )}
-            </div>
-
 
             {/* Notes */}
             <div className="bg-white p-3 rounded-lg">
@@ -378,29 +362,32 @@ export default function MessageDetailPage() {
 
           {/* Column 3 */}
           <div className="space-y-4">
-            {/* Message Type */}
+
+
+            {/* Source */}
             <div className="bg-white p-3 rounded-lg">
-              <Label className="block text-sm font-medium text-gray-600 mb-1">طبيعة المراسلة</Label>
-              {
-                isEditing ? (<div className="min-w-[150px]">
-                  <Select
-                    dir="rtl"
-                    defaultValue={message.TypeMessageries?.Libelle}
-                    onValueChange={(value) => handleChange('IdType', parseInt(value))}
-                  >
-                    <SelectTrigger className="bg-white border-gray-300 text-gray-800">
-                      {message.TypeMessageries?.Libelle}
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border-gray-200">
-                      <SelectItem value="1" className="hover:bg-white">وارد</SelectItem>
-                      <SelectItem value="2" className="hover:bg-white">صادر</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>) : (
-                  <p className="text-gray-800 font-medium">{message.TypeMessageries?.Libelle || "---"}</p>
-                )
-              }
+              <Label className="block text-sm font-medium text-gray-600 mb-1">المصدر</Label>
+              <div className="bg-white p-3 rounded-lg">
+                <p className="text-gray-800 font-medium">{message.Sources?.NomSource || message.AutreLibelleSource}</p>
+              </div>
             </div>
+
+            {/* distination */}
+            {
+              (message.IdType === 3) ? (
+
+                <div className="bg-white p-3 rounded-lg">
+                  <Label className="block text-sm font-medium text-gray-600 mb-1">المرسل إليه</Label>
+
+                  <div className="bg-white p-3 rounded-lg">
+                    <p className="text-gray-800 font-medium">{message.Sources_Messageries_IdSourceDestinationToSources?.NomSource || message.AutreLibelleDestination}</p>
+                  </div>
+
+                </div>
+              ) : null
+            }
+
+
           </div>
         </CardContent>
 
@@ -548,7 +535,7 @@ export default function MessageDetailPage() {
                                 e.stopPropagation();
                                 // Delete functionality would go here
                                 setIdDeleteReponse(response.IdReponse)
-                                setRefresh((prev)=>!prev)
+                                setRefresh((prev) => !prev)
                                 setIsDeleteOpen(true)
                               }}
                               variant="ghost" size="sm" className="h-8 gap-1">

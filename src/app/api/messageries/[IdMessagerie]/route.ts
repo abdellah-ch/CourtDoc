@@ -15,6 +15,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ IdMe
         include: {
             CodeFilieres: true,
             Sources: true,
+            Sources_Messageries_IdSourceDestinationToSources:true,
             TypeMessageries: true,
             Filieres: true,
             Etude: {

@@ -4,7 +4,7 @@ export const fetchMessageTypes = async (setMessageTypes: (data: any[]) => void) 
         const res = await fetch("/api/MessageTypes");
         const data: any[] = await res.json();
         setMessageTypes(data);
-        console.log(data);
+        // console.log(data);
     } catch (error) {
         console.error("Error fetching message types:", error);
     }
@@ -34,7 +34,7 @@ export const fetchSources = async (setAllSources: (data: any) => void) => {
 
     setAllSources(data)
 
-    console.log(data);
+    // console.log(data);
 }
 
 export const fetchResponsables = async (setResponsables: (data: any) => void) => {
@@ -44,7 +44,7 @@ export const fetchResponsables = async (setResponsables: (data: any) => void) =>
 
     setResponsables(data)
 
-    console.log(data);
+    // console.log(data);
 }
 
 
@@ -58,7 +58,7 @@ export const fetchCodeFilieres = async (IdFiliere: number, setCodeFilieres: (dat
 
     const data = await res.json()
 
-    console.log(data);
+    // console.log(data);
 
     setCodeFilieres(data)
 }
@@ -90,14 +90,14 @@ export async function fetchMessageriesByFiliere(idFiliere: number,setMessageries
   const response = await fetch(`/api/messageries/by-filiere?idFiliere=${idFiliere}`,{
     method:"GET"
   });
-  console.log(response);
+  // console.log(response);
    
   if (!response.ok) {
     throw new Error(`Failed to fetch messageries: ${response}`);
   }
   
   const data = await response.json();
-  console.log(data);
+  // console.log(data);
    
   setMessageries(data)
 }

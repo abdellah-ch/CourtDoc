@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider = "sqlserver"
-  url      = "sqlserver://10.30.10.254;database=CourtDocFlow;username=docflow;password=1234;trustServerCertificate=true"
+  url      = "sqlserver://localhost:1433;database=Court;username=sa;password=1234;trustServerCertificate=true"
 }
 
 model Cadre {
@@ -31,6 +31,7 @@ model Etude {
   IdMessagerie           Int
   IdProsecutor           Int?
   decision               String?                 @db.NVarChar(100)
+  DateDecision           DateTime?               @db.Date
   Messageries            Messageries             @relation(fields: [IdMessagerie], references: [IdMessagerie], onUpdate: NoAction, map: "FK__Etude__IdMessage__5EBF139D")
   ProsecutorResponsables ProsecutorResponsables? @relation(fields: [IdProsecutor], references: [IdResponsable], onDelete: NoAction, onUpdate: NoAction, map: "FK_Etude_ProsecutorResponsables")
 }
@@ -78,9 +79,12 @@ model Messageries {
   DeletedBy                                                       Int?
   DeletedDate                                                     DateTime?         @db.SmallDateTime
   prosecutor                                                      String?           @db.NVarChar(100)
+  IdSourceDestination                                             Int?
+  AutreLibelleDestination                                         String?           @db.NVarChar(35)
   Etude                                                           Etude[]
   MessagerieLinks_MessagerieLinks_IdMessagerieSourceToMessageries MessagerieLinks[] @relation("MessagerieLinks_IdMessagerieSourceToMessageries")
   MessagerieLinks_MessagerieLinks_IdMessagerieCibleToMessageries  MessagerieLinks[] @relation("MessagerieLinks_IdMessagerieCibleToMessageries")
+  Sources_Messageries_IdSourceDestinationToSources                Sources?          @relation("Messageries_IdSourceDestinationToSources", fields: [IdSourceDestination], references: [IdSource], onDelete: NoAction, onUpdate: NoAction, map: "FK__Messageri__IdSou__4D5F7D71")
   CodeFilieres                                                    CodeFilieres?     @relation(fields: [IdCode], references: [IdCode], onDelete: NoAction, onUpdate: NoAction, map: "FK__Messageri__IdCod__5535A963")
   Filieres                                                        Filieres?         @relation(fields: [IdFiliere], references: [IdFiliere], onDelete: NoAction, onUpdate: NoAction, map: "FK_Messageries_Filieres")
   Sources                                                         Sources?          @relation(fields: [IdSource], references: [IdSource], onDelete: NoAction, onUpdate: NoAction, map: "FK__Messageri__IdSou__5629CD9C")
@@ -116,6 +120,7 @@ model Reponses {
   DeletedDate        DateTime?   @db.SmallDateTime
   IsDeleted          Boolean     @default(false, map: "DF_Reponses_IsDeleted")
   AutreLibelleSource String?     @db.NVarChar(100)
+  NumeroReponse      String?     @db.NVarChar(30)
   Messageries        Messageries @relation(fields: [IdMessagerie], references: [IdMessagerie], onUpdate: NoAction, map: "FK__Reponses__IdMess__5AEE82B9")
   Sources            Sources?    @relation(fields: [IdSource], references: [IdSource], onDelete: NoAction, onUpdate: NoAction, map: "FK__Reponses__IdSour__5BE2A6F2")
 }
@@ -127,12 +132,13 @@ model Roles {
 }
 
 model Sources {
-  IdSource     Int           @id(map: "PK_Sources") @default(autoincrement())
-  NomSource    String        @db.NVarChar(100)
-  IdTypeSource Int?
-  Messageries  Messageries[]
-  Reponses     Reponses[]
-  TypeSource   TypeSource?   @relation(fields: [IdTypeSource], references: [IdTypeSource], onDelete: Cascade, map: "FK__Sources__IdTypeS__4E88ABD4")
+  IdSource                                             Int           @id(map: "PK_Sources") @default(autoincrement())
+  NomSource                                            String        @db.NVarChar(100)
+  IdTypeSource                                         Int?
+  Messageries_Messageries_IdSourceDestinationToSources Messageries[] @relation("Messageries_IdSourceDestinationToSources")
+  Messageries                                          Messageries[]
+  Reponses                                             Reponses[]
+  TypeSource                                           TypeSource?   @relation(fields: [IdTypeSource], references: [IdTypeSource], onDelete: Cascade, map: "FK__Sources__IdTypeS__4E88ABD4")
 }
 
 model TypeMessageries {

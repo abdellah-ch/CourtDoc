@@ -131,7 +131,7 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
 
               {currentEtude.decision && (
                 <div className="col-span-full space-y-1 pt-2">
-                  <Label className="text-muted-foreground">قرار الدراسة</Label>
+                  <Label className="text-muted-foreground">قرار </Label>
                   <p className="font-medium whitespace-pre-line">{currentEtude.decision}</p>
                 </div>
               )}
@@ -202,7 +202,7 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="studyDate">
-                {currentEtude?.Etude ? "تاريخ الإرجاع *" : "تاريخ الإرسال للدراسة *"}
+                {currentEtude?.Etude ? "تاريخ الإرجاع *" : "تاريخ الإرسال  *"}
               </Label>
               <Input
                 id="studyDate"
@@ -215,7 +215,7 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
 
             {!currentEtude?.Etude ? (
               <div className="space-y-2">
-                <Label>اختيار النائب المكلف بالدراسة *</Label>
+                <Label>اختيار النائب المكلف  *</Label>
                 <Select
                   value={selectedProsecutor}
                   onValueChange={setSelectedProsecutor}
@@ -237,7 +237,7 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
               </div>
             ) : (
               <div className="space-y-2">
-                <Label>قرار الدراسة *</Label>
+                <Label>قرار  *</Label>
                 <Textarea
                   value={decision}
                   onChange={(e) => setDecision(e.target.value)}
