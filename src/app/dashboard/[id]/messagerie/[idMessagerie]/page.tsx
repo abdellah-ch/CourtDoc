@@ -473,7 +473,7 @@ export default function MessageDetailPage() {
                 />
               ) : (
                 <div className="prose max-w-none">
-                  <p className="whitespace-pre-line">{message.resultat || "لا يوجد محتوى"}</p>
+                  <p className="whitespace-pre-line">{message.Resultat || "لا يوجد محتوى"}</p>
                 </div>
               )}
             </CardContent>
