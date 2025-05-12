@@ -133,7 +133,7 @@
 //                                                 </SidebarGroupLabel>
 //                                                  <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
 //                                                              <SidebarMenu className="space-y-1 pl-4">
-                                                                
+
 //                                                                     <SidebarMenuItem key={index} >
 //                                                                          <Link href="#">
 //                                                                            <SidebarMenuButton className="w-full px-4 py-4 text-right text-sm text-gray-600 hover:bg-gray-100 rounded-md transition-colors duration-200">
@@ -141,7 +141,7 @@
 //                                                                             </SidebarMenuButton>
 //                                                                         </Link>
 //                                                                     </SidebarMenuItem>
-                                                                
+
 //                                                            </SidebarMenu>
 //                                                        </CollapsibleContent>
 //                                             </Collapsible>
@@ -213,7 +213,7 @@ export function AppSidebarUser() {
         const data = await res.json();
         setGroups(data.UtilisateurGroupeFilieres);
     };
-    
+
     useEffect(() => {
         const username = localStorage.getItem('username') || '';
         setUsername(username);
@@ -271,19 +271,26 @@ export function AppSidebarUser() {
                             <SidebarGroupContent className="space-y-1">
                                 {item.GroupeFilieres.Filieres.map((Current: any, index: any) => (
                                     <div key={index} className="ml-2 border-l-2 border-gray-200 pl-3">
-                                        <Collapsible  defaultOpen={false}>
+                                        <Collapsible defaultOpen={false}>
                                             <SidebarGroupLabel asChild>
                                                 <CollapsibleTrigger className="w-full px-3 py-2.5   text-gray-700 hover:bg-gray-100 rounded-md flex items-center justify-between cursor-pointer transition-colors">
                                                     <span className="truncate text-xs font-bold">{Current.Libelle}</span>
                                                     <ChevronDown className="w-4 h-4 transition-transform duration-200 group-data-[state=open]:rotate-180 text-gray-700" />
                                                 </CollapsibleTrigger>
                                             </SidebarGroupLabel>
-                                            <CollapsibleContent  className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
+                                            <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
                                                 <SidebarMenu className="mt-1  border-l-2 border-gray-200 space-y-1">
                                                     <SidebarMenuItem >
-                                                        <Link href={"/dashboard/"+Current.IdFiliere+"/record"}>
-                                                            <SidebarMenuButton  className="w-full h-fit   text-xs text-black hover:bg-gray-100 rounded-md transition-colors cursor-pointer">
+                                                        <Link href={"/dashboard/" + Current.IdFiliere + "/record"}>
+                                                            <SidebarMenuButton className="w-full h-fit   text-xs text-black hover:bg-gray-100 rounded-md transition-colors cursor-pointer">
                                                                 سجل {Current.Libelle}
+                                                            </SidebarMenuButton>
+                                                        </Link>
+                                                    </SidebarMenuItem>
+                                                    <SidebarMenuItem >
+                                                        <Link href={"/dashboard/" + Current.IdFiliere + "/searchres"}>
+                                                            <SidebarMenuButton className="w-full h-fit   text-xs text-black hover:bg-gray-100 rounded-md transition-colors cursor-pointer">
+                                                                البحت برقم الجواب
                                                             </SidebarMenuButton>
                                                         </Link>
                                                     </SidebarMenuItem>

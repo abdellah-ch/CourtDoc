@@ -6,11 +6,11 @@ const prisma = new PrismaClient()
 export async function POST(req: NextRequest, { params }: { params: Promise<{ IdMessagerie: string }> }) {
 
 
-    const {IdMessagerie} = await params;
+    const { IdMessagerie } = await params;
     const id = Number(IdMessagerie)
     const data = await req.json();
 
-    console.log(data);
+    // console.log(data);
 
     try {
         if (data.source === '') {
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ IdM
                     Contenu: data.content,
                     IdMessagerie: id,
                     AutreLibelleSource: data.otherSource,
-
+                    NumeroReponse: data.NumeroReponse
                 }
             })
 
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ IdM
                     Contenu: data.content,
                     IdMessagerie: id,
                     IdSource: Number(data.source),
-
+                    NumeroReponse: data.NumeroReponse
                 }
             })
 

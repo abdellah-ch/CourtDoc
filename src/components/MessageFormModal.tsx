@@ -39,11 +39,11 @@ type FormData = {
     otherSource: string;
     content: string;
     date: string;
+    NumeroReponse: string;
 };
 
 interface MessageFormModalProps {
-
-    setRefresh : Dispatch<SetStateAction<boolean>>
+    setRefresh: Dispatch<SetStateAction<boolean>>
     idMessagerie: string;
 }
 
@@ -56,6 +56,7 @@ export function MessageFormModal({ setRefresh, idMessagerie }: MessageFormModalP
     const [isButtonDisabled, setIsButtonDisabled] = useState(false)
     const form = useForm<FormData>({
         defaultValues: {
+            NumeroReponse: "",
             sourceType: "",
             source: "",
             otherSource: "",
@@ -90,13 +91,6 @@ export function MessageFormModal({ setRefresh, idMessagerie }: MessageFormModalP
 
     const onSubmit = async (data: FormData) => {
         setIsButtonDisabled(true)
-        // console.log({
-        //     ...data,
-        //     idMessagerie,
-        //     source: anotherSource ? data.otherSource : data.source
-        // });
-        console.log(data);
-
 
         fetch(`/api/response/${idMessagerie}`, {
             method: "POST",
@@ -104,36 +98,11 @@ export function MessageFormModal({ setRefresh, idMessagerie }: MessageFormModalP
             body: JSON.stringify(data),
         }).then((res) => {
             toast.success("تمت الاضافة بنجاح")
-            setRefresh((prev)=>!prev)
+            setRefresh((prev) => !prev)
             setIsModalOpen(false)
         }).catch((err) => {
             toast.error(err)
         })
-
-
-
-
-
-        // try {
-        //   const payload = {
-        //     ...data,
-        //     idMessagerie,
-        //     source: anotherSource ? data.otherSource : data.source
-        //   };
-
-        //   const response = await fetch("/api/messages", {
-        //     method: "POST",
-        //     headers: { "Content-Type": "application/json" },
-        //     body: JSON.stringify(payload),
-        //   });
-
-        //   if (response.ok) {
-        //     console.log("تم حفظ الرسالة بالمعرف:", idMessagerie);
-        //     form.reset();
-        //   }
-        // } catch (error) {
-        //   console.error("خطأ:", error);
-        // }
     };
 
     return (
@@ -188,7 +157,7 @@ export function MessageFormModal({ setRefresh, idMessagerie }: MessageFormModalP
                                             items={availableSources}
                                             value={field.value || ""}
                                             onValueChange={field.onChange}
-                                            placeholder="اختر المصدر"
+                                            placeholder=" المصدر"
                                             searchPlaceholder="ابحث عن المصدر..."
                                             renderItem={(item: any) => `${item.NomSource}`}
                                         />
@@ -206,7 +175,7 @@ export function MessageFormModal({ setRefresh, idMessagerie }: MessageFormModalP
                                         <FormControl>
                                             <Input
                                                 {...field}
-                                                placeholder="أدخل مصدر آخر"
+                                                placeholder=" مصدر آخر"
                                                 value={field.value || ""}
                                                 onChange={(e) => {
                                                     field.onChange(e);
@@ -220,20 +189,18 @@ export function MessageFormModal({ setRefresh, idMessagerie }: MessageFormModalP
                             />
                         )}
 
+
+                        {/* NumeroReponse */}
                         <FormField
                             control={form.control}
-                            name="content"
+                            name="NumeroReponse"
+                            rules={{ required: "رقم الجواب مطلوب" }} // Add this line
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>المحتوى</FormLabel>
+                                    <FormLabel>رقم الجواب</FormLabel>
                                     <FormControl>
-                                        <Textarea
-                                            {...field}
-                                            placeholder="أدخل محتوى الرد"
-                                            value={field.value || ""}
-                                        />
+                                        <Input {...field} placeholder="رقم الجواب" value={field.value} />
                                     </FormControl>
-                                    <FormMessage />
                                 </FormItem>
                             )}
                         />
@@ -241,9 +208,10 @@ export function MessageFormModal({ setRefresh, idMessagerie }: MessageFormModalP
                         <FormField
                             control={form.control}
                             name="date"
+                            rules={{ required: "تاريخ الجواب مطلوب" }} // Add this line
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>التاريخ</FormLabel>
+                                    <FormLabel>تاريخ الجواب</FormLabel>
                                     <FormControl>
                                         <Input
                                             dir="rtl"
@@ -256,11 +224,31 @@ export function MessageFormModal({ setRefresh, idMessagerie }: MessageFormModalP
                                 </FormItem>
                             )}
                         />
-                        <div className="flex gap-2 mt-8">
-                        <Button disabled={isButtonDisabled} type="submit"  className="w-[49%] cursor-pointer">حفظ</Button>
 
-                        <Button type="button" variant="outline" onClick={()=>setIsModalOpen(false)} className="w-[49%] cursor-pointer" >الغاء</Button>
-                    
+                        <FormField
+                            control={form.control}
+                            name="content"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>الموضوع</FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            {...field}
+                                            placeholder=" الموضوع"
+                                            value={field.value || ""}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+
+                        <div className="flex gap-2 mt-8">
+                            <Button disabled={isButtonDisabled} type="submit" className="w-[49%] cursor-pointer">حفظ</Button>
+
+                            <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="w-[49%] cursor-pointer" >الغاء</Button>
+
                         </div>
                     </form>
                 </Form>

@@ -27,7 +27,7 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
   const [decision, setDecision] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [currentEtude, setCurrentEtude] = useState<any>(null);
-
+  const [dateDecision, setDateDecision] = useState<string>("");
   useEffect(() => {
     // Find current active study (where Etude = true) or most recent
     const activeEtude = message.Etude?.find((e: any) => e.Etude) ||
@@ -51,6 +51,7 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            DateDecision: dateDecision,
             DateRetour: newStudyDate,
             decision
           })
@@ -128,17 +129,119 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
                   <p className="font-medium">{format(new Date(currentEtude.DateRetour), "dd/MM/yyyy")}</p>
                 </div>
               )}
-
+              {currentEtude.DateDecision && (
+                <div className="space-y-1">
+                  <Label className="text-muted-foreground">تاريخ القرار</Label>
+                  <p className="font-medium">{format(new Date(currentEtude.DateDecision), "dd/MM/yyyy")}</p>
+                </div>
+              )}
               {currentEtude.decision && (
-                <div className="col-span-full space-y-1 pt-2">
-                  <Label className="text-muted-foreground">قرار </Label>
+                <div className=" space-y-1 pt-2">
+                  <Label className="text-muted-foreground">القرار </Label>
                   <p className="font-medium whitespace-pre-line">{currentEtude.decision}</p>
                 </div>
               )}
+
+
+
             </div>
           )}
         </div>
+        {/* Action Form */}
+        <div className="border p-4 rounded-lg space-y-4">
+          <h3 className="font-medium">
+            {currentEtude?.Etude ? "تسجيل إرجاع المراسلة" : "إرسال المراسلة للدراسة"}
+          </h3>
+          <div >
+            <div className={currentEtude?.Etude ? "flex gap-11 w-fit space-y-4 " : "flex gap-11 w-full space-y-4 "}>
+              <div className={currentEtude?.Etude ? "space-y-2 w-fit mb-6" : "space-y-2 w-full mb-6"} >
+                <Label htmlFor="studyDate">
+                  {currentEtude?.Etude ? "تاريخ الإرجاع *" : "تاريخ الإرسال  *"}
+                </Label>
+                <Input
+                  id="studyDate"
+                  type="date"
+                  className={currentEtude?.Etude ? 'w-fit' : 'w-[20%]'}
+                  value={newStudyDate}
+                  onChange={(e) => setNewStudyDate(e.target.value)}
+                  required
+                />
+              </div>
+              {currentEtude?.Etude ? (
+                <div className="space-y-2 w-fit" >
+                  <Label htmlFor="DecisionDate">
+                    تاريخ القرار
+                  </Label>
+                  <Input
+                    id="DecisionDate"
+                    type="date"
+                    value={dateDecision}
+                    onChange={(e) => setDateDecision(e.target.value)}
+                    required
+                  />
+                </div>
+              ) : null
+              }
 
+            </div>
+            {!currentEtude?.Etude ? (
+              <div className="space-y-2 w-full">
+                <Label>اختيار النائب المكلف  *</Label>
+                <Select
+                  value={selectedProsecutor}
+                  onValueChange={setSelectedProsecutor}
+                >
+                  <SelectTrigger className='w-[20%]'>
+                    <SelectValue placeholder="اختر النائب..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {prosecutors.map((prosecutor) => (
+                      <SelectItem
+                        key={prosecutor.IdResponsable}
+                        value={prosecutor.IdResponsable.toString()}
+                      >
+                        {prosecutor.prenom} {prosecutor.nom}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label>قرار  *</Label>
+                <Textarea
+                  value={decision}
+                  onChange={(e) => setDecision(e.target.value)}
+                  placeholder="أدخل قرار الدراسة..."
+                  className="min-h-[100px]"
+                  required
+                />
+              </div>
+            )}
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setNewStudyDate("");
+                  setSelectedProsecutor("");
+                  setDecision("");
+                }}
+                disabled={isLoading}
+              >
+                إلغاء
+              </Button>
+              <Button
+                onClick={handleStudyAction}
+                disabled={(!newStudyDate || isLoading ||
+                  (!currentEtude?.Etude && !selectedProsecutor) ||
+                  (currentEtude?.Etude && !decision))}
+              >
+                {isLoading ? "جاري الحفظ..." :
+                  currentEtude?.Etude ? "تسجيل الإرجاع" : "إرسال للدراسة"}
+              </Button>
+            </div>
+          </div>
+        </div>
         {/* Study History */}
         <div className="space-y-4">
           <h3 className="font-medium">سجل الدراسات السابقة</h3>
@@ -167,22 +270,31 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
                         {etude.Etude ? "دراسة" : "إرجاع"}
                       </Badge>
                     </div>
+                    <div>
 
-                    {etude.ProsecutorResponsables && (
-                      <div className="space-y-1">
-                        <Label className="text-muted-foreground text-sm">النائب المكلف</Label>
-                        <p>
-                          {etude.ProsecutorResponsables.prenom} {etude.ProsecutorResponsables.nom}
-                        </p>
-                      </div>
-                    )}
-
-                    {etude.decision && (
-                      <div className="space-y-1">
-                        <Label className="text-muted-foreground text-sm">قرار الدراسة</Label>
-                        <p className="whitespace-pre-line">{etude.decision}</p>
-                      </div>
-                    )}
+                    </div>
+                    <div className='flex gap-24'>
+                      {etude.ProsecutorResponsables && (
+                        <div className="space-y-1">
+                          <Label className="text-muted-foreground text-sm">النائب المكلف</Label>
+                          <p>
+                            {etude.ProsecutorResponsables.prenom} {etude.ProsecutorResponsables.nom}
+                          </p>
+                        </div>
+                      )}
+                      {etude.DateDecision && (
+                        <div className="space-y-1">
+                          <Label className="text-muted-foreground text-sm">تاريخ الدراسة</Label>
+                          <p className="whitespace-pre-line">{format(new Date(etude.DateDecision), "dd/MM/yyyy")}</p>
+                        </div>
+                      )}
+                      {etude.decision && (
+                        <div className="space-y-1">
+                          <Label className="text-muted-foreground text-sm">قرار الدراسة</Label>
+                          <p className="whitespace-pre-line">{etude.decision}</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))
             ) : (
@@ -193,85 +305,8 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
           </div>
         </div>
 
-        {/* Action Form */}
-        <div className="border p-4 rounded-lg space-y-4">
-          <h3 className="font-medium">
-            {currentEtude?.Etude ? "تسجيل إرجاع المراسلة" : "إرسال المراسلة للدراسة"}
-          </h3>
 
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="studyDate">
-                {currentEtude?.Etude ? "تاريخ الإرجاع *" : "تاريخ الإرسال  *"}
-              </Label>
-              <Input
-                id="studyDate"
-                type="date"
-                value={newStudyDate}
-                onChange={(e) => setNewStudyDate(e.target.value)}
-                required
-              />
-            </div>
 
-            {!currentEtude?.Etude ? (
-              <div className="space-y-2">
-                <Label>اختيار النائب المكلف  *</Label>
-                <Select
-                  value={selectedProsecutor}
-                  onValueChange={setSelectedProsecutor}
-                >
-                  <SelectTrigger className='w-full'>
-                    <SelectValue placeholder="اختر النائب..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {prosecutors.map((prosecutor) => (
-                      <SelectItem
-                        key={prosecutor.IdResponsable}
-                        value={prosecutor.IdResponsable.toString()}
-                      >
-                        {prosecutor.prenom} {prosecutor.nom}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <Label>قرار  *</Label>
-                <Textarea
-                  value={decision}
-                  onChange={(e) => setDecision(e.target.value)}
-                  placeholder="أدخل قرار الدراسة..."
-                  className="min-h-[100px]"
-                  required
-                />
-              </div>
-            )}
-
-            <div className="flex justify-end gap-2 pt-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setNewStudyDate("");
-                  setSelectedProsecutor("");
-                  setDecision("");
-                }}
-                disabled={isLoading}
-              >
-                إلغاء
-              </Button>
-              <Button
-                onClick={handleStudyAction}
-                disabled={(!newStudyDate || isLoading ||
-                  (!currentEtude?.Etude && !selectedProsecutor) ||
-                  (currentEtude?.Etude && !decision))}
-              >
-                {isLoading ? "جاري الحفظ..." :
-                  currentEtude?.Etude ? "تسجيل الإرجاع" : "إرسال للدراسة"}
-              </Button>
-            </div>
-          </div>
-        </div>
       </CardContent>
     </Card>
   );

@@ -427,7 +427,7 @@ export default function MessageDetailPage() {
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="message" className="gap-2 cursor-pointer">
             <Mail className="h-4 w-4" />
-            النتيجة
+            النتيجة  
           </TabsTrigger>
           <TabsTrigger value="responses" className="gap-2 cursor-pointer">
             <MessageSquareText className="h-4 w-4" />
@@ -436,7 +436,7 @@ export default function MessageDetailPage() {
           </TabsTrigger>
           <TabsTrigger value="etude" className="gap-2 cursor-pointer">
             <BookMarked className="h-4 w-4" />
-            الدراسة
+            الدراسة ({message.Etude?.length || 0})
           </TabsTrigger>
           <TabsTrigger value="attachments" className="gap-2 cursor-pointer">
             <Paperclip className="h-4 w-4" />
@@ -507,13 +507,15 @@ export default function MessageDetailPage() {
               </div>
               <MessageFormModal setRefresh={setRefresh} idMessagerie={idMessagerie?.toString() || ""} />
             </CardHeader>
-            <CardContent>
+            <CardContent className="custom-scrollbar">
+
               {message.Reponses?.length > 0 ? (
-                <Table>
+                <Table >
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="text-right">رقم الجواب</TableHead>
                       <TableHead className="text-right">المصدر</TableHead>
-                      <TableHead className="text-right">المحتوى</TableHead>
+                      <TableHead className="text-right">الموضوع</TableHead>
                       <TableHead className="text-right">التاريخ</TableHead>
                       <TableHead className="text-right">الإجراءات</TableHead>
                     </TableRow>
@@ -522,10 +524,13 @@ export default function MessageDetailPage() {
                     {message.Reponses.map((response: any) => {
                       if (response.IsDeleted == false) {
                         return (<TableRow key={response.IdReponse} className="cursor-pointer hover:bg-muted/50">
-                          <TableCell className="font-medium text-right">
+                          <TableCell className="text-right">
+                            {response.NumeroReponse}
+                          </TableCell>
+                          <TableCell className="text-right">
                             {response.Sources?.NomSource || response.AutreLibelleSource}
                           </TableCell>
-                          <TableCell className="text-right">{response.Contenu}</TableCell>
+                          <TableCell className=" font-medium text-right max-w-[400px] truncate">{response.Contenu}</TableCell>
                           <TableCell className="text-right">
                             {response.DateReponse && format(new Date(response.DateReponse), "dd/MM/yyyy")}
                           </TableCell>

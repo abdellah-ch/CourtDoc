@@ -7,12 +7,13 @@ export async function GET(
     request: Request,
     { params }: any
 ) {
+    const {id} = await params
     try {
         const links = await prisma.messagerieLinks.findMany({
             where: {
                 OR: [
-                    { IdMessagerieSource: Number(params.id) },
-                    { IdMessagerieCible: Number(params.id) }
+                    { IdMessagerieSource: Number(id) },
+                    { IdMessagerieCible: Number(id) }
                 ]
             },
             include: {

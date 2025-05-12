@@ -36,9 +36,9 @@ import { SearchableSelect } from "@/components/SearchableSelect";
 const formSchema = z.object({
   CodeReference: z.string().optional(),
   NumeroMessagerie: z.string().optional(),
-  CodeBarre: z.string().min(1, "حقل مطلوب"),
+  CodeBarre: z.string().optional(),
   dateMessage: z.date({ required_error: "حقل مطلوب" }),
-  dateArrivee: z.date({ required_error: "حقل مطلوب" }),
+  dateArrivee: z.date().optional(),
   sujet: z.string().min(1, "حقل مطلوب"),
   remarques: z.string().optional(),
   statut: z.string().min(1, "حقل مطلوب"),
@@ -50,7 +50,7 @@ const formSchema = z.object({
   idSourceDestination: z.string().optional(),
   AutreLibelleSource: z.string().min(0, "حفل مطلوب"),
   AutreLibelleDestination: z.string().optional(),
-  IdTypeDestination:z.string().optional()
+  IdTypeDestination: z.string().optional()
   // document: z.instanceof(File).optional(),
 });
 
@@ -72,7 +72,7 @@ export default function AddMessagerieForm() {
       statut: "",
       idType: "",
       IdTypeSource: "",
-      IdTypeDestination:"",
+      IdTypeDestination: "",
       idCode: "",
       idSource: "",
       AutreLibelleSource: ""
@@ -88,10 +88,10 @@ export default function AddMessagerieForm() {
   const [filiereLibelle, setFiliereLibelle] = useState<string>("")
   const [allSources, setAllSources] = useState<any>()
   const [Availablesources, setAvailableSources] = useState<any[]>([]);
-  
+
   const [AvailableDestinations, setAvailableDestinations] = useState<any[]>([]);
   const [anotherSource, setAnotherSource] = useState<boolean>(false)
-  const [anotherDestination,setAnotherDestination] = useState<boolean>(false)
+  const [anotherDestination, setAnotherDestination] = useState<boolean>(false)
   const [isDisabled, setIsDisabled] = useState<boolean>(false)
   // const [responsable, setResponsables] = useState<any>()
   const [codeFilieres, setCodeFilieres] = useState<any[]>()
@@ -135,7 +135,7 @@ export default function AddMessagerieForm() {
 
     }
 
-  }, [selectedIdTypeSource, selectedSources,selectedIdTypeDestination])
+  }, [selectedIdTypeSource, selectedSources, selectedIdTypeDestination])
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsDisabled(true)
@@ -247,7 +247,7 @@ export default function AddMessagerieForm() {
               name="CodeReference"
               render={({ field }) => (
                 <FormItem className="text-right">
-                  <FormLabel>المرجع</FormLabel>
+                  <FormLabel>المرجع  (اختياري) </FormLabel>
                   <FormControl>
                     <Input {...field} placeholder=" أدخل رقم المرجع " />
                   </FormControl>
@@ -286,7 +286,7 @@ export default function AddMessagerieForm() {
               name="CodeBarre"
               render={({ field }) => (
                 <FormItem className="text-right">
-                  <FormLabel>رقم المضمون</FormLabel>
+                  <FormLabel> رقم المضمون  (اختياري) </FormLabel>
                   <FormControl>
                     <Input {...field} placeholder=" أدخل رقم المضمون " />
                   </FormControl>
@@ -337,49 +337,51 @@ export default function AddMessagerieForm() {
                 </FormItem>
               )}
             />
+            {Number(selectedIdTypeMessagerie) != 2 && (
+              <FormField
+                control={form.control}
+                name="dateArrivee"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col text-right">
+                    <FormLabel>تاريخ الوصول </FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-right font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "yyyy-MM-dd", { locale: ar })
+                            ) : (
+                              <span>اختر التاريخ</span>
+                            )}
+                            <CalendarIcon className="mr-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            date > new Date() || date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                          locale={ar}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
-            <FormField
-              control={form.control}
-              name="dateArrivee"
-              render={({ field }) => (
-                <FormItem className="flex flex-col text-right">
-                  <FormLabel>تاريخ الوصول </FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full pl-3 text-right font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "yyyy-MM-dd", { locale: ar })
-                          ) : (
-                            <span>اختر التاريخ</span>
-                          )}
-                          <CalendarIcon className="mr-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date("1900-01-01")
-                        }
-                        initialFocus
-                        locale={ar}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             {/* Message Content */}
             <FormField
@@ -421,7 +423,7 @@ export default function AddMessagerieForm() {
               name="IdTypeSource"
               render={({ field }) => (
                 <FormItem className="text-right">
-                  <FormLabel>نوع المصدر</FormLabel>
+                  <FormLabel>{Number(selectedIdTypeMessagerie) === 2 ? "نوع المرسل إليه" : "نوع المرسل"}</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger dir="rtl" className="w-full cursor-pointer">
@@ -450,7 +452,7 @@ export default function AddMessagerieForm() {
                   name="idSource"
                   render={({ field }) => (
                     <FormItem className="text-right">
-                      <FormLabel>اختر المصدر </FormLabel>
+                      <FormLabel>{Number(selectedIdTypeMessagerie) === 2 ? " المرسل إليه" : " المرسل"}  </FormLabel>
                       <SearchableSelect
                         items={Availablesources}
                         value={field.value || ""}
@@ -468,10 +470,10 @@ export default function AddMessagerieForm() {
                 name="AutreLibelleSource"
                 render={({ field }) => (
                   <FormItem className="text-right">
-                    <FormLabel> مصدر أخر</FormLabel>
+                    <FormLabel>  أخر</FormLabel>
                     <FormControl>
                       <Input {...field}
-                        placeholder=" أدخل مصدر"
+                        placeholder="  مصدر"
                         value={field.value || ""}
                         onChange={(e) => {
                           field.onChange(e);
