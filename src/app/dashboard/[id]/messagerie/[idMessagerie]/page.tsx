@@ -126,7 +126,14 @@ export default function MessageDetailPage() {
       });
   }, [idMessagerie, isDeleteOpen, refresh, isResultEditing]);
 
-  if (!message) return <div className="flex justify-center items-center h-64">Loading...</div>;
+  if (!message) return (
+    <div className="p-6 flex justify-center items-center h-[50vh]">
+      <div className="text-center space-y-2">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+        <p className="text-lg font-medium">جاري التحميل...</p>
+      </div>
+    </div>
+  )
 
   const handleUpdateResultat = () => {
     // Implement update logic
@@ -427,7 +434,7 @@ export default function MessageDetailPage() {
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="message" className="gap-2 cursor-pointer">
             <Mail className="h-4 w-4" />
-            النتيجة  
+            النتيجة
           </TabsTrigger>
           <TabsTrigger value="responses" className="gap-2 cursor-pointer">
             <MessageSquareText className="h-4 w-4" />

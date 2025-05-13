@@ -95,7 +95,8 @@ export function MessageriesTable<TData extends Messagerie>({
       header: "الرقم الترتيبي",
       cell: ({ row }) => <div className="text-right">{row.getValue("NumeroOrdre")}</div>,
       filterFn: (row, id, value) => {
-        return value === undefined || row.getValue(id) === value;
+        if (value === undefined || value === "") return true;
+        return Number(row.getValue(id)) === Number(value);
       }
     },
     {
