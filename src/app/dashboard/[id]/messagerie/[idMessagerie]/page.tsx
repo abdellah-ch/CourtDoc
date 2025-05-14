@@ -128,7 +128,6 @@ export default function MessageDetailPage() {
       toast.success("تم التحديث بنجاح")
     })
     // Implement your save logic here
-
   };
 
 

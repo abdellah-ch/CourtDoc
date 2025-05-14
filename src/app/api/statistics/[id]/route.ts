@@ -43,14 +43,15 @@ export async function GET(request: Request, { params }: any) {
     })
 
     // Prosecutor statistics (updated to count unique messages)
+    // Prosecutor statistics (updated to count unique messages)
     const prosecutors = await prisma.prosecutorResponsables.findMany({
       where: { IsDeleted: false }
     })
 
     const prosecutorsWithStats = await Promise.all(
       prosecutors.map(async (prosecutor) => {
-        // Get unique messages studied by this prosecutor
-        const uniqueMessages = await prisma.etude.findMany({
+        // Get all messages studied by this prosecutor
+        const prosecutorMessages = await prisma.etude.findMany({
           where: {
             IdProsecutor: prosecutor.IdResponsable,
             Messageries: {
@@ -58,27 +59,55 @@ export async function GET(request: Request, { params }: any) {
               ...dateFilter,
             }
           },
-          distinct: ['IdMessagerie'],
           select: {
+            IdMessagerie: true,
+            DateEtude: true,
             Messageries: {
               select: {
                 Statut: true
               }
             }
           }
-        })
+        });
 
-        const completed = uniqueMessages.filter(m => m.Messageries.Statut === 'منجز').length
-        const pending = uniqueMessages.filter(m => m.Messageries.Statut === 'غير منجز').length
+        // Get all etudes for each message to determine who studied it first
+        const messagesWithFirstProsecutor = await Promise.all(
+          prosecutorMessages.map(async ({ IdMessagerie, DateEtude, Messageries }) => {
+            const firstEtude = await prisma.etude.findFirst({
+              where: {
+                IdMessagerie: IdMessagerie
+              },
+              orderBy: {
+                DateEtude: 'asc'
+              },
+              select: {
+                IdProsecutor: true
+              }
+            });
+
+            return {
+              IdMessagerie,
+              Statut: Messageries.Statut,
+              isFirst: firstEtude?.IdProsecutor === prosecutor.IdResponsable
+            };
+          })
+        );
+
+        // Only count messages where this prosecutor was first
+        const validMessages = messagesWithFirstProsecutor.filter(m => m.isFirst);
+
+        const completed = validMessages.filter(m => m.Statut === 'منجز').length;
+        const pending = validMessages.filter(m => m.Statut === 'غير منجز').length;
 
         return {
           prosecutorId: prosecutor.IdResponsable,
           prosecutorName: `${prosecutor.prenom} ${prosecutor.nom}`,
           completed,
           pending
-        }
+        };
       })
-    )
+    );
+
 
     // Statistics by subject (top 10 subjects)
     const subjectStats = await prisma.messageries.groupBy({

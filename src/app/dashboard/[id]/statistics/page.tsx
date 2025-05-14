@@ -15,7 +15,7 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts'
-import { DatePicker } from 'antd'
+import { DatePicker, Pagination } from 'antd'
 import dayjs from 'dayjs'
 const { RangePicker } = DatePicker
 
@@ -26,6 +26,7 @@ export default function StatisticsPage({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
   const router = useRouter()
 
   const { id } = useParams()
@@ -104,6 +105,14 @@ export default function StatisticsPage({ params }: { params: { id: string } }) {
     })
   }
 
+  // Pagination for prosecutors table
+  const pageSize = 5
+  const totalPages = Math.ceil(stats.prosecutors.length / pageSize)
+  const paginatedProsecutors = stats.prosecutors.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  )
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -132,51 +141,71 @@ export default function StatisticsPage({ params }: { params: { id: string } }) {
         </div>
       </div>
 
-      {/* Status Pie Chart */}
+      {/* Status Pie Chart with Table */}
       <div className="bg-white p-6 rounded-lg shadow mb-8">
         <h3 className="text-lg font-semibold mb-4 text-right">حالة المراسلات</h3>
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={statusData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-              >
-                {statusData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
+        <div className="flex flex-col md:flex-row gap-8">
+          {/* Pie Chart */}
+          <div className="h-64 w-full md:w-1/2">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={statusData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  
+                >
+                  {statusData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          
+          {/* Data Table */}
+          <div className="w-full md:w-1/2">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 uppercase tracking-wider">الحالة</th>
+                    <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 uppercase tracking-wider">العدد</th>
+                    <th className="px-4 py-3 text-right text-sm font-medium text-gray-700 uppercase tracking-wider">النسبة</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {statusData.map((item, index) => (
+                    <tr key={index}>
+                      <td className="px-4 py-4 whitespace-nowrap text-right">
+                        <span className="inline-block w-3 h-3 rounded-full mr-2" 
+                              style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
+                        {item.name}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-right">{item.value}</td>
+                      <td className="px-4 py-4 whitespace-nowrap text-right">
+                        {((item.value / stats.totalMessages) * 100).toFixed(1)}%
+                      </td>
+                    </tr>
+                  ))}
+                  <tr className="font-semibold">
+                    <td className="px-4 py-4 whitespace-nowrap text-right">الإجمالي</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-right">{stats.totalMessages}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-right">100%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Monthly Trends */}
-      <div className="bg-white p-6 rounded-lg shadow mb-8">
-        <h3 className="text-lg font-semibold mb-4 text-right">الاتجاه الشهري للمراسلات</h3>
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={monthlyChartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis width={40} />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="count" fill="#8884d8" name="عدد المراسلات" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Prosecutors Table - Updated version */}
+      {/* Prosecutors Table with Pagination */}
       <div className="bg-white p-6 rounded-lg shadow mb-8">
         <h3 className="text-lg font-semibold mb-4 text-right"> نشاط السادة النواب </h3>
         <div className="overflow-x-auto">
@@ -190,7 +219,7 @@ export default function StatisticsPage({ params }: { params: { id: string } }) {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {stats.prosecutors.map((prosecutor: any, index: number) => {
+              {paginatedProsecutors.map((prosecutor: any, index: number) => {
                 const total = prosecutor.completed + prosecutor.pending
                 const completionRate = total > 0 ? Math.round((prosecutor.completed / total) * 100) : 0
                 
@@ -209,10 +238,39 @@ export default function StatisticsPage({ params }: { params: { id: string } }) {
               })}
             </tbody>
           </table>
+          
+          {/* Pagination */}
+          <div className="mt-4 flex justify-center">
+            <Pagination
+              current={currentPage}
+              total={stats.prosecutors.length}
+              pageSize={pageSize}
+              onChange={(page) => setCurrentPage(page)}
+              showSizeChanger={false}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Message Types - Updated with "وارد_صادر" */}
+      {/* Rest of your components remain the same */}
+      {/* Monthly Trends */}
+      <div className="bg-white p-6 rounded-lg shadow mb-8">
+        <h3 className="text-lg font-semibold mb-4 text-right">الاتجاه الشهري للمراسلات</h3>
+        <div className="h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={monthlyChartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis width={40} />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="count" fill="#8884d8" name="عدد المراسلات" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Message Types */}
       <div className="bg-white p-6 rounded-lg shadow mb-8">
         <h3 className="text-lg font-semibold mb-4 text-right">أنواع المراسلات</h3>
         <div className="h-64">
@@ -240,7 +298,7 @@ export default function StatisticsPage({ params }: { params: { id: string } }) {
 
       {/* Top Subjects */}
       <div className="bg-white p-6 rounded-lg shadow mb-8">
-        <h3 className="text-lg font-semibold mb-4 text-right">أهم المواضيع</h3>
+        <h3 className="text-lg font-semibold mb-4 text-right">عدد الإرساليات حسب الموضوع </h3>
         <div className="space-y-2">
           {stats.subjects.map((subject: any, index: number) => (
             <div key={index} className="flex justify-between items-center">
