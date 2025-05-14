@@ -8,19 +8,14 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { toast } from 'sonner';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { SearchableSelect } from "@/components/SearchableSelect";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function EtudeWorkflow({ message, refreshData, prosecutors }: {
   message: any;
   refreshData: Dispatch<SetStateAction<boolean>>;
-  prosecutors: any[]; // Array of ProsecutorResponsables
+  prosecutors: any[];
 }) {
   const [newStudyDate, setNewStudyDate] = useState<string>("");
   const [selectedProsecutor, setSelectedProsecutor] = useState<string>("");
@@ -28,8 +23,51 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
   const [isLoading, setIsLoading] = useState(false);
   const [currentEtude, setCurrentEtude] = useState<any>(null);
   const [dateDecision, setDateDecision] = useState<string>("");
+  const [sourceTypes, setSourceTypes] = useState<any[]>([]);
+  const [selectedSourceType, setSelectedSourceType] = useState<string>("");
+  const [sources, setSources] = useState<any[]>([]);
+  const [selectedSource, setSelectedSource] = useState<string>("");
+
+  // Fetch source types on component mount
   useEffect(() => {
-    // Find current active study (where Etude = true) or most recent
+    const fetchSourceTypes = async () => {
+      try {
+        const response = await fetch('/api/source-types');
+        if (!response.ok) throw new Error('Failed to fetch source types');
+        const data = await response.json();
+        setSourceTypes(data);
+      } catch (error) {
+        console.error('Error fetching source types:', error);
+        toast.error('حدث خطأ أثناء جلب أنواع المصادر');
+      }
+    };
+
+    fetchSourceTypes();
+  }, []);
+
+  // Fetch sources when source type is selected
+  useEffect(() => {
+    const fetchSourcesByType = async () => {
+      if (!selectedSourceType) {
+        setSources([]);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/sources?typeId=${selectedSourceType}`);
+        if (!response.ok) throw new Error('Failed to fetch sources');
+        const data = await response.json();
+        setSources(data);
+      } catch (error) {
+        console.error('Error fetching sources:', error);
+        toast.error('حدث خطأ أثناء جلب المصادر');
+      }
+    };
+
+    fetchSourcesByType();
+  }, [selectedSourceType]);
+
+  useEffect(() => {
     const activeEtude = message.Etude?.find((e: any) => e.Etude) ||
       (message.Etude?.length > 0 ? message.Etude[message.Etude.length - 1] : null);
     setCurrentEtude(activeEtude);
@@ -41,7 +79,6 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
     setIsLoading(true);
     try {
       if (currentEtude?.Etude) {
-        // Mark as returned - require decision
         if (!decision) {
           toast.warning("يجب إدخال قرار الدراسة");
           return;
@@ -53,11 +90,11 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
           body: JSON.stringify({
             DateDecision: dateDecision,
             DateRetour: newStudyDate,
-            decision
+            decision,
+            IdSource: selectedSource || null
           })
         });
       } else {
-        // Create new study record - require prosecutor selection
         if (!selectedProsecutor) {
           toast.warning("يجب اختيار النائب المكلف بالدراسة");
           return;
@@ -78,6 +115,8 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
       setNewStudyDate("");
       setSelectedProsecutor("");
       setDecision("");
+      setSelectedSourceType("");
+      setSelectedSource("");
       toast.success("تم تحديث حالة الدراسة بنجاح");
     } catch (error) {
       console.error('Error:', error);
@@ -90,8 +129,7 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
   return (
     <Card>
       <CardHeader className="border-b">
-        <CardTitle className="text-xl">سجل الدراسة</CardTitle>
-        <CardDescription>إدارة عملية دراسة المراسلة</CardDescription>
+        <CardTitle className="text-xl">القرارات</CardTitle>
       </CardHeader>
       <CardContent className="p-6 space-y-6">
         {/* Current Status */}
@@ -135,28 +173,34 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
                   <p className="font-medium">{format(new Date(currentEtude.DateDecision), "dd/MM/yyyy")}</p>
                 </div>
               )}
+              {currentEtude.Sources && (
+                <div className="space-y-1">
+                  <Label className="text-muted-foreground">المصدر</Label>
+                  <p className="font-medium">
+                    {currentEtude.Sources.NomSource} ({currentEtude.Sources.TypeSource?.Libelle})
+                  </p>
+                </div>
+              )}
               {currentEtude.decision && (
-                <div className=" space-y-1 pt-2">
-                  <Label className="text-muted-foreground">القرار </Label>
+                <div className="space-y-1 pt-2">
+                  <Label className="text-muted-foreground">القرار</Label>
                   <p className="font-medium whitespace-pre-line">{currentEtude.decision}</p>
                 </div>
               )}
-
-
-
             </div>
           )}
         </div>
+
         {/* Action Form */}
         <div className="border p-4 rounded-lg space-y-4">
           <h3 className="font-medium">
             {currentEtude?.Etude ? "تسجيل إرجاع المراسلة" : "إرسال المراسلة للدراسة"}
           </h3>
-          <div >
-            <div className={currentEtude?.Etude ? "flex gap-11 w-fit space-y-4 " : "flex gap-11 w-full space-y-4 "}>
-              <div className={currentEtude?.Etude ? "space-y-2 w-fit mb-6" : "space-y-2 w-full mb-6"} >
+          <div>
+            <div className={currentEtude?.Etude ? "flex gap-11 w-fit space-y-4" : "flex gap-11 w-full space-y-4"}>
+              <div className={currentEtude?.Etude ? "space-y-2 w-fit mb-6" : "space-y-2 w-full mb-6"}>
                 <Label htmlFor="studyDate">
-                  {currentEtude?.Etude ? "تاريخ الإرجاع *" : "تاريخ الإرسال  *"}
+                  {currentEtude?.Etude ? "تاريخ الإرجاع *" : "تاريخ الإرسال *"}
                 </Label>
                 <Input
                   id="studyDate"
@@ -167,26 +211,88 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
                   required
                 />
               </div>
-              {currentEtude?.Etude ? (
-                <div className="space-y-2 w-fit" >
-                  <Label htmlFor="DecisionDate">
-                    تاريخ القرار
-                  </Label>
-                  <Input
-                    id="DecisionDate"
-                    type="date"
-                    value={dateDecision}
-                    onChange={(e) => setDateDecision(e.target.value)}
+              {currentEtude?.Etude && (
+                <>
+
+                  <div className="space-y-2 w-fit">
+                    <Label htmlFor="DecisionDate">
+                      تاريخ القرار
+                    </Label>
+                    <Input
+                      id="DecisionDate"
+                      type="date"
+                      value={dateDecision}
+                      onChange={(e) => setDateDecision(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2 w-fit">
+                    <Label>اختيار نوع المصدر</Label>
+                    <Select
+                      value={selectedSourceType}
+                      onValueChange={(value) => {
+                        setSelectedSourceType(value);
+                        setSelectedSource(""); // Reset source when type changes
+                      }}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="اختر نوع المصدر..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sourceTypes.map((type) => (
+                          <SelectItem
+                            key={type.IdTypeSource}
+                            value={type.IdTypeSource.toString()}
+                          >
+                            {type.Libelle}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {selectedSourceType && (
+                    <div className="space-y-2 w-fit">
+                      <Label>اختيار المصدر</Label>
+                      <SearchableSelect
+                        items={sources}
+                        value={selectedSource}
+                        onValueChange={setSelectedSource}
+                        placeholder="اختر مصدر "
+                        searchPlaceholder="ابحث عن مصدر..."
+                        renderItem={(source: any) => (
+                          <div>
+                            <span>{source.NomSource}</span>
+                          </div>
+                        )}
+                      />
+                    </div>
+                  )}
+
+
+
+                </>
+              )}
+            </div>
+            {
+              currentEtude?.Etude && (
+                <div className="space-y-2">
+                  <Label>قرار *</Label>
+                  <Textarea
+                    value={decision}
+                    onChange={(e) => setDecision(e.target.value)}
+                    placeholder="أدخل قرار الدراسة..."
+                    className="min-h-[100px]"
                     required
                   />
                 </div>
-              ) : null
-              }
+              )
+            }
 
-            </div>
             {!currentEtude?.Etude ? (
               <div className="space-y-2 w-full">
-                <Label>اختيار النائب المكلف  *</Label>
+                <Label>اختيار النائب المكلف *</Label>
                 <Select
                   value={selectedProsecutor}
                   onValueChange={setSelectedProsecutor}
@@ -206,18 +312,8 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
                   </SelectContent>
                 </Select>
               </div>
-            ) : (
-              <div className="space-y-2">
-                <Label>قرار  *</Label>
-                <Textarea
-                  value={decision}
-                  onChange={(e) => setDecision(e.target.value)}
-                  placeholder="أدخل قرار الدراسة..."
-                  className="min-h-[100px]"
-                  required
-                />
-              </div>
-            )}
+            ) : null}
+
             <div className="flex justify-end gap-2 pt-2">
               <Button
                 variant="outline"
@@ -225,6 +321,8 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
                   setNewStudyDate("");
                   setSelectedProsecutor("");
                   setDecision("");
+                  setSelectedSourceType("");
+                  setSelectedSource("");
                 }}
                 disabled={isLoading}
               >
@@ -242,71 +340,6 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
             </div>
           </div>
         </div>
-        {/* Study History */}
-        <div className="space-y-4">
-          <h3 className="font-medium">سجل الدراسات السابقة</h3>
-          <div className="space-y-3">
-            {message.Etude?.length > 0 ? (
-              [...message.Etude]
-                .sort((a: any, b: any) => new Date(b.DateEtude).getTime() - new Date(a.DateEtude).getTime())
-                .map((etude) => (
-                  <div key={etude.IdEtude} className="border p-4 rounded-lg space-y-3">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">
-                          {format(new Date(etude.DateEtude), "dd/MM/yyyy")}
-                        </span>
-                        {etude.DateRetour && (
-                          <>
-                            <span className="text-muted-foreground">→</span>
-                            <span className="font-medium">
-                              {format(new Date(etude.DateRetour), "dd/MM/yyyy")}
-                            </span>
-                          </>
-                        )}
-
-                      </div>
-                      <Badge variant={etude.Etude ? "default" : "destructive"}>
-                        {etude.Etude ? "دراسة" : "إرجاع"}
-                      </Badge>
-                    </div>
-                    <div>
-
-                    </div>
-                    <div className='flex gap-24'>
-                      {etude.ProsecutorResponsables && (
-                        <div className="space-y-1">
-                          <Label className="text-muted-foreground text-sm">النائب المكلف</Label>
-                          <p>
-                            {etude.ProsecutorResponsables.prenom} {etude.ProsecutorResponsables.nom}
-                          </p>
-                        </div>
-                      )}
-                      {etude.DateDecision && (
-                        <div className="space-y-1">
-                          <Label className="text-muted-foreground text-sm">تاريخ الدراسة</Label>
-                          <p className="whitespace-pre-line">{format(new Date(etude.DateDecision), "dd/MM/yyyy")}</p>
-                        </div>
-                      )}
-                      {etude.decision && (
-                        <div className="space-y-1">
-                          <Label className="text-muted-foreground text-sm">قرار الدراسة</Label>
-                          <p className="whitespace-pre-line">{etude.decision}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))
-            ) : (
-              <p className="text-muted-foreground text-center py-4">
-                لا يوجد سجل دراسات سابقة
-              </p>
-            )}
-          </div>
-        </div>
-
-
-
       </CardContent>
     </Card>
   );

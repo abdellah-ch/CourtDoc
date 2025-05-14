@@ -70,7 +70,45 @@ export default function MessageDetailPage() {
   const params = useParams();
   // console.log(params.id);
 
+  const getCombinedActions = () => {
+    // Get decisions with DateDecision (Etude)
+    const decisions = message.Etude
+      ?.filter((etude: any) => etude.DateDecision)
+      .map((etude: any) => ({
+        id: `decision-${etude.IdEtude}`,
+        type: 'قرار',
+        date: etude.DateDecision,
+        subject: etude.decision,
+        source: etude.Sources?.NomSource,
+        prosecutor: etude.ProsecutorResponsables
+          ? `${etude.ProsecutorResponsables.prenom} ${etude.ProsecutorResponsables.nom}`
+          : null
+      })) || [];
 
+    // Get responses (Reponses)
+    const responses = message.Reponses
+      ?.filter((response: any) => !response.IsDeleted)
+      .map((response: any) => ({
+        id: `response-${response.IdReponse}`,
+        type: `#${response.NumeroReponse}جواب`,
+        date: response.DateReponse,
+        subject: response.Contenu,
+        source: response.Sources?.NomSource || response.AutreLibelleSource,
+        prosecutor: null
+      })) || [];
+
+    // Combine and sort by date (decisions first when dates are equal)
+    return [...decisions, ...responses].sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+
+      if (dateA === dateB) {
+        // Decisions come before responses when dates are equal
+        return a.type === 'قرار' ? -1 : 1;
+      }
+      return dateB - dateA; // Newest first
+    });
+  };
 
   const handleChange = (field: keyof Messageries, value: any) => {
     setEditedData(prev => ({ ...prev, [field]: value }));
@@ -431,7 +469,7 @@ export default function MessageDetailPage() {
 
       {/* Tab System */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="message" className="gap-2 cursor-pointer">
             <Mail className="h-4 w-4" />
             النتيجة
@@ -443,7 +481,11 @@ export default function MessageDetailPage() {
           </TabsTrigger>
           <TabsTrigger value="etude" className="gap-2 cursor-pointer">
             <BookMarked className="h-4 w-4" />
-            الدراسة ({message.Etude?.length || 0})
+            القرارات ({message.Etude?.length || 0})
+          </TabsTrigger>
+          <TabsTrigger value="actions" className="gap-2 cursor-pointer">
+            <FileText className="h-4 w-4" />
+            الإجراءات
           </TabsTrigger>
           <TabsTrigger value="attachments" className="gap-2 cursor-pointer">
             <Paperclip className="h-4 w-4" />
@@ -509,14 +551,13 @@ export default function MessageDetailPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle>سجل الأجوبة</CardTitle>
-                <CardDescription>جميع الأجوبة المرتبطة بهذه الرسالة</CardDescription>
+                <CardTitle>إضافة الأجوبة</CardTitle>
               </div>
               <MessageFormModal setRefresh={setRefresh} idMessagerie={idMessagerie?.toString() || ""} />
             </CardHeader>
             <CardContent className="custom-scrollbar">
 
-              {message.Reponses?.length > 0 ? (
+              {/* {message.Reponses?.length > 0 ? (
                 <Table >
                   <TableHeader>
                     <TableRow>
@@ -571,7 +612,7 @@ export default function MessageDetailPage() {
                   <MessageSquareText className="h-8 w-8" />
                   <p>لا توجد ردود مسجلة</p>
                 </div>
-              )}
+              )} */}
             </CardContent>
           </Card>
         </TabsContent>
@@ -581,7 +622,51 @@ export default function MessageDetailPage() {
           <EtudeWorkflow message={message} refreshData={setRefresh} prosecutors={responsable} />
 
         </TabsContent>
-
+        {/* actions */}
+        {/* Actions Timeline */}
+        <TabsContent value="actions" className="pt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>سجل الإجراءات</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-right">النوع</TableHead>
+                    <TableHead className="text-right">التاريخ</TableHead>
+                    <TableHead className="text-right">الموضوع</TableHead>
+                    <TableHead className="text-right">المصدر</TableHead>
+                    <TableHead className="text-right">النائب</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {getCombinedActions().map((action) => (
+                    <TableRow key={action.id}>
+                      <TableCell>
+                        <Badge variant={action.type === 'قرار' ? 'default' : 'secondary'}>
+                          {action.type}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {action.date && format(new Date(action.date), "dd/MM/yyyy")}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {action.subject}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {action.source}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {action.prosecutor || '---'}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
         {/* Attachments */}
         <TabsContent value="attachments" className="pt-6">
           <MessageLinksManager

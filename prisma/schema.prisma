@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider = "sqlserver"
-  url      = "sqlserver://10.30.10.254;database=Court;username=docflow;password=1234;trustServerCertificate=true"
+  url      = "sqlserver://localhost:1433;database=Court;username=sa;password=1234;trustServerCertificate=true"
 }
 
 model Cadre {
@@ -32,8 +32,10 @@ model Etude {
   IdProsecutor           Int?
   decision               String?                 @db.NVarChar(100)
   DateDecision           DateTime?               @db.Date
+  IdSource               Int?
   Messageries            Messageries             @relation(fields: [IdMessagerie], references: [IdMessagerie], onUpdate: NoAction, map: "FK__Etude__IdMessage__5EBF139D")
   ProsecutorResponsables ProsecutorResponsables? @relation(fields: [IdProsecutor], references: [IdResponsable], onDelete: NoAction, onUpdate: NoAction, map: "FK_Etude_ProsecutorResponsables")
+  Sources                Sources?                @relation(fields: [IdSource], references: [IdSource], onDelete: NoAction, onUpdate: NoAction, map: "FK_Etude_Sources")
 }
 
 model Filieres {
@@ -135,6 +137,7 @@ model Sources {
   IdSource                                             Int           @id(map: "PK_Sources") @default(autoincrement())
   NomSource                                            String        @db.NVarChar(100)
   IdTypeSource                                         Int?
+  Etude                                                Etude[]
   Messageries_Messageries_IdSourceDestinationToSources Messageries[] @relation("Messageries_IdSourceDestinationToSources")
   Messageries                                          Messageries[]
   Reponses                                             Reponses[]

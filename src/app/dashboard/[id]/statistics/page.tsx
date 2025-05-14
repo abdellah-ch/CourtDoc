@@ -178,7 +178,7 @@ export default function StatisticsPage({ params }: { params: { id: string } }) {
 
       {/* Prosecutors Table - Updated version */}
       <div className="bg-white p-6 rounded-lg shadow mb-8">
-        <h3 className="text-lg font-semibold mb-4 text-right">النواب المكلفين بالدراسة</h3>
+        <h3 className="text-lg font-semibold mb-4 text-right"> نشاط السادة النواب </h3>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">

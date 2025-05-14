@@ -114,7 +114,7 @@ export function MessageFormModal({ setRefresh, idMessagerie }: MessageFormModalP
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]" dir="rtl">
                 <DialogHeader dir="rtl" className="text-center">
-                    <DialogTitle className="text-center">إضافة رد على الإرسالية </DialogTitle>
+                    <DialogTitle className="text-center">إضافة  جواب   </DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4" dir="rtl">

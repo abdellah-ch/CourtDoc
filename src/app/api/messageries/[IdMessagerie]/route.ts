@@ -20,6 +20,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ IdMe
             Filieres: true,
             Etude: {
                 include: {
+                    Sources:true,
                     ProsecutorResponsables: true
                 }
             },

@@ -53,9 +53,9 @@ export async function GET(request: Request, { params }: any) {
         const uniqueMessages = await prisma.etude.findMany({
           where: {
             IdProsecutor: prosecutor.IdResponsable,
-            ...dateFilter,
             Messageries: {
               IdFiliere: parseInt(id),
+              ...dateFilter,
             }
           },
           distinct: ['IdMessagerie'],
