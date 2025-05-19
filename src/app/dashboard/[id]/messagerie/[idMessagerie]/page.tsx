@@ -51,6 +51,7 @@ import { Messageries } from "@/generated/prisma";
 import { EtudeWorkflow } from "@/components/EtudeWorkflow";
 import { MessageLinksManager } from "@/components/MessageLinksManager";
 import { fetchMessageriesByFiliere, fetchResponsables } from "@/lib/FetchMessagerieInfo";
+import { saveAs } from 'file-saver';
 
 export default function MessageDetailPage() {
   const { idMessagerie } = useParams();
@@ -146,6 +147,25 @@ export default function MessageDetailPage() {
       })
   };
 
+  const handleDownload = async () => {
+    try {
+      const response = await fetch('/api/generate-docx', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message }), // Send the entire message object
+      });
+
+      if (!response.ok) throw new Error('Failed to generate document');
+
+      const blob = await response.blob();
+      const filename = `message-${message.NumeroMessagerie || 'document'}.docx`;
+      saveAs(blob, filename);
+    } catch (error) {
+      toast.error('فشل في إنشاء الوثيقة');
+      console.error('Download error:', error);
+    }
+  };
+
   useEffect(() => {
     fetchResponsables(setResponsable)
     if (params.id) {
@@ -197,21 +217,22 @@ export default function MessageDetailPage() {
       />
       {/* Header with Back Button */}
       <div className="flex items-center justify-between">
-        <Button
-          variant="ghost"
-          onClick={() => router.back()}
-          className="gap-2"
-        >
-          <ChevronLeft className="h-4 w-4" />
-          العودة إلى القائمة
-        </Button>
-
+        <>
+          <Button
+            variant="ghost"
+            onClick={() => router.back()}
+            className="gap-2"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            العودة إلى القائمة
+          </Button>
+        </>
         <div className="flex gap-2">
           <Button variant="outline" className="gap-2">
             <Printer className="h-4 w-4" />
             طباعة
           </Button>
-          <Button variant="outline" className="gap-2">
+          <Button variant="outline" className="gap-2" onClick={handleDownload}>
             <Download className="h-4 w-4" />
             تصدير
           </Button>
@@ -234,10 +255,18 @@ export default function MessageDetailPage() {
                     />
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-600">رقم الإرسالية:</span>
-                    <span className="text-gray-800">{message.NumeroMessagerie}</span>
-                  </div>
+                  <>
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="text-gray-600">الرقم الترتيبي:</span>
+                      <span className="text-gray-800">{message.NumeroOrdre}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="text-gray-600">رقم الإرسالية:</span>
+                      <span className="text-gray-800">{message.NumeroMessagerie}</span>
+                    </div>
+                  </>
+
                 )}
               </CardTitle>
 

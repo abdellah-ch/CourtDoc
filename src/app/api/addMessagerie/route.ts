@@ -52,12 +52,12 @@ export async function POST(request: Request) {
     });
 
     const nextNumeroOrdre = lastMessagerie
-      ? lastMessagerie.NumeroOrdre  + 1 : 1;
+      ? lastMessagerie.NumeroOrdre + 1 : 1;
 
     // 3. Generate CodeComplet (format: year/codeFiliere/numeroOrdre)
     const codeComplet = `${nextNumeroOrdre.toString().padStart(3, '0')}/${codeFiliereValue}/${currentYear}`
     // 4. Determine NumeroMessagerie based on idType
-    const finalNumeroMessagerie = parseInt(idType) === 1
+    const finalNumeroMessagerie = (parseInt(idType) === 1 || parseInt(idType) === 3)
       ? NumeroMessagerie
       : codeComplet;
 

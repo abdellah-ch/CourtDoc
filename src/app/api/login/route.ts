@@ -1,7 +1,7 @@
 import { PrismaClient } from '@/generated/prisma';
 import jwt from 'jsonwebtoken';
 import { NextRequest, NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs'; 
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 const SECRET = process.env.JWT_SECRET || '';
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
   const user = await prisma.utilisateurs.findFirst({
     where: { UserName: UserName },
     include: {
-      Roles: true, 
+      Roles: true,
     },
   });
 
@@ -29,20 +29,21 @@ export async function POST(req: NextRequest) {
 
   // Generate JWT
   const token = jwt.sign(
-    { id: user.IdUtilisateur, role: user.Roles.Libelle , username: user.UserName },
+    { id: user.IdUtilisateur, role: user.Roles.Libelle, username: user.UserName },
     SECRET,
     { expiresIn: '365d' }
   );
 
   // Set cookie
-  const response = NextResponse.json({ message: 'Login successful',role : user.IdRole,IdUtilisateur:user.IdUtilisateur,username : user.UserName });
-   
+  const response = NextResponse.json({ message: 'Login successful', role: user.IdRole, IdUtilisateur: user.IdUtilisateur, username: user.UserName });
+
 
   response.cookies.set('session', token, {
     httpOnly: true,
+    secure: false,
     path: '/',
-    maxAge: 60 * 60 * 2499999999 * 9999999999, // 1 day
+    maxAge:  60 * 60 * 24 * 365 * 10,
   });
- 
+
   return response;
 }

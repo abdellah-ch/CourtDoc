@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -32,6 +33,7 @@ import { createMessagerie, fetchCodeFilieres, fetchFiliereLibelle, fetchMessageT
 import { useParams, useRouter } from 'next/navigation';
 // import { sources } from "next/dist/compiled/webpack/webpack";
 import { SearchableSelect } from "@/components/SearchableSelect";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
   CodeReference: z.string().optional(),
@@ -46,11 +48,15 @@ const formSchema = z.object({
   IdTypeSource: z.string().min(1, "حقل مطلوب"),
   idProsecutor: z.string().optional(),
   idCode: z.string().min(1, "حقل مطلوب"),
-  idSource: z.string().optional(),
+  idSource: z.string().min(1, "حقل مطلوب"),
   idSourceDestination: z.string().optional(),
   AutreLibelleSource: z.string().min(0, "حفل مطلوب"),
   AutreLibelleDestination: z.string().optional(),
-  IdTypeDestination: z.string().optional()
+  IdTypeDestination: z.string().optional(),
+  underSupervision: z.boolean().default(false).optional(),
+  participants_courrier: z.string().optional(), // or add any specific validation you need
+
+
   // document: z.instanceof(File).optional(),
 });
 
@@ -75,7 +81,9 @@ export default function AddMessagerieForm() {
       IdTypeDestination: "",
       idCode: "",
       idSource: "",
-      AutreLibelleSource: ""
+      AutreLibelleSource: "",
+      participants_courrier: "",
+      underSupervision: false,
     },
   });
 
@@ -116,7 +124,6 @@ export default function AddMessagerieForm() {
           }
         });
       }
-
     }
 
     if (selectedIdTypeDestination) {
@@ -160,7 +167,8 @@ export default function AddMessagerieForm() {
       // router.push('/messageries');
 
       // console.log("Messagerie created:", response);
-      router.push(`/dashboard/${id}/record`)
+      // router.push(`/dashboard/${id}/record`)
+      setIsDisabled(false)
     } catch (error) {
       // console.error("Error creating messagerie:", error);
 
@@ -169,6 +177,7 @@ export default function AddMessagerieForm() {
           ? error.message
           : "حدث خطأ أثناء حفظ الإرسالية"
       );
+      setIsDisabled(false)
     }
   }
   return (
@@ -178,27 +187,7 @@ export default function AddMessagerieForm() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" method="post">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FormField
-              control={form.control}
-              name="statut"
-              render={({ field }) => (
-                <FormItem className="text-right">
-                  <FormLabel>الإنجاز</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger dir="rtl" className="w-full cursor-pointer">
-                        <SelectValue placeholder="الإنجاز" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent dir="rtl" >
-                      <SelectItem value="منجز">منجز</SelectItem>
-                      <SelectItem value="غير منجز">غير منجز</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
 
             <FormField
               control={form.control}
@@ -427,7 +416,7 @@ export default function AddMessagerieForm() {
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger dir="rtl" className="w-full cursor-pointer">
-                        <SelectValue placeholder="اختر نوع المصدر" />
+                        <SelectValue placeholder={Number(selectedIdTypeMessagerie) === 2 ? "نوع المرسل إليه" : "نوع المرسل"} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent dir="rtl">
@@ -457,8 +446,8 @@ export default function AddMessagerieForm() {
                         items={Availablesources}
                         value={field.value || ""}
                         onValueChange={field.onChange}
-                        placeholder="اختر المصدر"
-                        searchPlaceholder="ابحث عن المصدر..."
+                        placeholder={Number(selectedIdTypeMessagerie) === 2 ? " المرسل إليه" : " المرسل"}
+                        searchPlaceholder={Number(selectedIdTypeMessagerie) === 2 ? " المرسل إليه" : " المرسل"}
                         renderItem={(eleme: any) => `${eleme.NomSource}`}
                       />
                       <FormMessage />
@@ -566,7 +555,68 @@ export default function AddMessagerieForm() {
             }
 
 
-
+            <FormField
+              control={form.control}
+              name="statut"
+              render={({ field }) => (
+                <FormItem className="text-right">
+                  <FormLabel>الإنجاز</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger dir="rtl" className="w-full cursor-pointer">
+                        <SelectValue placeholder="الإنجاز" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent dir="rtl" >
+                      <SelectItem value="منجز">منجز</SelectItem>
+                      <SelectItem value="غير منجز">غير منجز</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="underSupervision"
+              render={({ field }) => (
+                <FormItem className="text-right" dir="rtl">
+                  <FormLabel className="cursor-pointer font-medium text-gray-700">
+                    الإشراف
+                  </FormLabel>
+                  <FormControl>
+                    <div className="flex flex-row gap-2">
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className=" border-2 border-gray-300 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+                      />
+                      <FormDescription className="text-right text-xs text-muted-foreground">
+                        (مراسلة تحت الإشراف)
+                      </FormDescription>
+                    </div>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="participants_courrier"
+              render={({ field }) => (
+                <FormItem className="text-right">
+                  <FormLabel>أطراف المراسلة</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="أدخل أطراف المراسلة"
+                      value={field.value || ""}
+                    />
+                  </FormControl>
+                  
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
           <div className="flex justify-end gap-4">

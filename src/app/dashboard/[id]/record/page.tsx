@@ -165,8 +165,8 @@ export default function FiliereArchivePage({ params }: any) {
 
         if (yearFilter !== "all") {
             result = result.filter(m =>
-                new Date(m.DateArrivee).getFullYear().toString() ? 
-                new Date(m.DateArrivee).getFullYear().toString() === yearFilter: 
+                // new Date(m.DateArrivee).getFullYear().toString() ? 
+                // new Date(m.DateArrivee).getFullYear().toString() === yearFilter: 
                 new Date(m.DateMessage).getFullYear().toString() === yearFilter
             );
         }

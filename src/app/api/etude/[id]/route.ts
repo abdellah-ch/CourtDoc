@@ -17,7 +17,7 @@ export async function PATCH(
         DateDecision: DateDecision ? new Date(DateDecision) : null,
         Etude: false, // Always false when returning
         decision,
-        IdSource:Number(IdSource)
+        IdSource: IdSource ? Number(IdSource) : null
       },
       include: {
         Messageries: true,

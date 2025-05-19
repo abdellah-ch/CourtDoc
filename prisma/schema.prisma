@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider = "sqlserver"
-  url      = "sqlserver://localhost:1433;database=Court;username=sa;password=1234;trustServerCertificate=true"
+  url      = "sqlserver://localhost;database=Court;username=sa;password=1234;trustServerCertificate=true"
 }
 
 model Cadre {
@@ -83,6 +83,8 @@ model Messageries {
   prosecutor                                                      String?           @db.NVarChar(100)
   IdSourceDestination                                             Int?
   AutreLibelleDestination                                         String?           @db.NVarChar(35)
+  underSupervision                                                Boolean?
+  participants_courrier                                           String?           @db.NVarChar(Max)
   Etude                                                           Etude[]
   MessagerieLinks_MessagerieLinks_IdMessagerieSourceToMessageries MessagerieLinks[] @relation("MessagerieLinks_IdMessagerieSourceToMessageries")
   MessagerieLinks_MessagerieLinks_IdMessagerieCibleToMessageries  MessagerieLinks[] @relation("MessagerieLinks_IdMessagerieCibleToMessageries")

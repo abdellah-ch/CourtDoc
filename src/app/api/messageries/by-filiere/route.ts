@@ -27,6 +27,11 @@ export async function GET(req: NextRequest) {
                     }
                 },
                 Reponses: true,
+                Etude :{
+                    select:{
+                        ProsecutorResponsables : true
+                    }
+                },
                 Sources: {
                     select: {
                         NomSource: true

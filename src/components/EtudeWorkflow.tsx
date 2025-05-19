@@ -6,17 +6,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { toast } from 'sonner';
 import { Textarea } from "@/components/ui/textarea";
 import { SearchableSelect } from "@/components/SearchableSelect";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ChevronLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 
 export function EtudeWorkflow({ message, refreshData, prosecutors }: {
   message: any;
   refreshData: Dispatch<SetStateAction<boolean>>;
   prosecutors: any[];
 }) {
+  const [messagerieStatus, setMessagerieStatus] = useState<string>("");
+
   const [newStudyDate, setNewStudyDate] = useState<string>("");
   const [selectedProsecutor, setSelectedProsecutor] = useState<string>("");
   const [decision, setDecision] = useState<string>("");
@@ -27,7 +32,11 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
   const [selectedSourceType, setSelectedSourceType] = useState<string>("");
   const [sources, setSources] = useState<any[]>([]);
   const [selectedSource, setSelectedSource] = useState<string>("");
-
+  useEffect(() => {
+    if (message?.Statut) {
+      setMessagerieStatus(message.Statut);
+    }
+  }, [message?.Statut]);
   // Fetch source types on component mount
   useEffect(() => {
     const fetchSourceTypes = async () => {
@@ -73,58 +82,74 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
     setCurrentEtude(activeEtude);
   }, [message.Etude]);
 
+  const router = useRouter();
+  const params = useParams();
+  const id = params.id; // This gets the id from the URL
+
   const handleStudyAction = async () => {
-    if (!newStudyDate) return;
+  if (!newStudyDate) return;
 
-    setIsLoading(true);
-    try {
-      if (currentEtude?.Etude) {
-        if (!decision) {
-          toast.warning("يجب إدخال قرار الدراسة");
-          return;
-        }
+  setIsLoading(true);
+  try {
+    if (currentEtude?.Etude) {
+      if (!decision) {
+        toast.warning("يجب إدخال قرار الدراسة");
+        return;
+      }
 
-        await fetch(`/api/etude/${currentEtude.IdEtude}`, {
+      // Update Etude
+      await fetch(`/api/etude/${currentEtude.IdEtude}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          DateDecision: dateDecision,
+          DateRetour: newStudyDate,
+          decision,
+          IdSource: selectedSource || null
+        })
+      });
+
+      // Update Messagerie status if selected
+      if (messagerieStatus) {
+        await fetch(`/api/messagerie/${message.IdMessagerie}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            DateDecision: dateDecision,
-            DateRetour: newStudyDate,
-            decision,
-            IdSource: selectedSource || null
-          })
-        });
-      } else {
-        if (!selectedProsecutor) {
-          toast.warning("يجب اختيار النائب المكلف بالدراسة");
-          return;
-        }
-
-        await fetch('/api/etude', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            IdMessagerie: message.IdMessagerie,
-            DateEtude: newStudyDate,
-            IdProsecutor: selectedProsecutor
+            statut: messagerieStatus
           })
         });
       }
+    } else {
+      if (!selectedProsecutor) {
+        toast.warning("يجب اختيار النائب المكلف بالدراسة");
+        return;
+      }
 
-      refreshData((prev: boolean) => !prev);
-      setNewStudyDate("");
-      setSelectedProsecutor("");
-      setDecision("");
-      setSelectedSourceType("");
-      setSelectedSource("");
-      toast.success("تم تحديث حالة الدراسة بنجاح");
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error("حدث خطأ أثناء حفظ التغييرات");
-    } finally {
-      setIsLoading(false);
+      await fetch('/api/etude', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          IdMessagerie: message.IdMessagerie,
+          DateEtude: newStudyDate,
+          IdProsecutor: selectedProsecutor
+        })
+      });
     }
-  };
+
+    refreshData((prev: boolean) => !prev);
+    setNewStudyDate("");
+    setSelectedProsecutor("");
+    setDecision("");
+    setSelectedSourceType("");
+    setSelectedSource("");
+    toast.success("تم تحديث حالة الدراسة بنجاح");
+  } catch (error) {
+    console.error('Error:', error);
+    toast.error("حدث خطأ أثناء حفظ التغييرات");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <Card>
@@ -175,7 +200,7 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
               )}
               {currentEtude.Sources && (
                 <div className="space-y-1">
-                  <Label className="text-muted-foreground">المصدر</Label>
+                  <Label className="text-muted-foreground">المرسل إليه</Label>
                   <p className="font-medium">
                     {currentEtude.Sources.NomSource} ({currentEtude.Sources.TypeSource?.Libelle})
                   </p>
@@ -226,9 +251,23 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
                       required
                     />
                   </div>
-
                   <div className="space-y-2 w-fit">
-                    <Label>اختيار نوع المصدر</Label>
+                    <Label>حالة المراسلة</Label>
+                    <Select
+                      value={messagerieStatus}
+                      onValueChange={setMessagerieStatus}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="اختر حالة المراسلة..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="منجز">منجز</SelectItem>
+                        <SelectItem value="غير منجز">غير منجز</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2 w-fit">
+                    <Label>اختيار نوع المرسل إليه</Label>
                     <Select
                       value={selectedSourceType}
                       onValueChange={(value) => {
@@ -237,7 +276,7 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
                       }}
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="اختر نوع المصدر..." />
+                        <SelectValue placeholder="اختر نوع المرسل إليه..." />
                       </SelectTrigger>
                       <SelectContent>
                         {sourceTypes.map((type) => (
@@ -254,13 +293,13 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
 
                   {selectedSourceType && (
                     <div className="space-y-2 w-fit">
-                      <Label>اختيار المصدر</Label>
+                      <Label>اختيار المرسل إليه</Label>
                       <SearchableSelect
                         items={sources}
                         value={selectedSource}
                         onValueChange={setSelectedSource}
-                        placeholder="اختر مصدر "
-                        searchPlaceholder="ابحث عن مصدر..."
+                        placeholder="اختر المرسل إليه "
+                        searchPlaceholder="ابحث عن المرسل إليه..."
                         renderItem={(source: any) => (
                           <div>
                             <span>{source.NomSource}</span>
@@ -293,7 +332,23 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
             {!currentEtude?.Etude ? (
               <div className="space-y-2 w-full">
                 <Label>اختيار النائب المكلف *</Label>
-                <Select
+                <div className='w-[20%]'>
+
+                  <SearchableSelect
+                    items={prosecutors}
+                    value={selectedProsecutor}
+                    onValueChange={setSelectedProsecutor}
+                    placeholder="اختر النائب..."
+                    searchPlaceholder="ابحث عن النائب..."
+                    renderItem={(source: any) => (
+                      <div>
+                        <span>{source.nom} {source.prenom}</span>
+                      </div>
+                    )}
+                  />
+
+                </div>
+                {/* <Select
                   value={selectedProsecutor}
                   onValueChange={setSelectedProsecutor}
                 >
@@ -310,7 +365,7 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
                       </SelectItem>
                     ))}
                   </SelectContent>
-                </Select>
+                </Select> */}
               </div>
             ) : null}
 
@@ -341,6 +396,16 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
           </div>
         </div>
       </CardContent>
+      <CardFooter className='flex justify-end'>
+        <Button
+          variant="ghost"
+          onClick={() => { router.push(`/dashboard/${id}/newm`); }}
+          className="gap-2"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          إضافة مراسلة جديدة
+        </Button>
+      </CardFooter>
     </Card>
   );
 }

@@ -62,6 +62,7 @@ interface Messagerie {
     Libelle: string
   }
   Reponses?: any[]
+  Etude?: any[]
 }
 
 interface DataTableProps<TData> {
@@ -118,6 +119,29 @@ export function MessageriesTable<TData extends Messagerie>({
       }
     },
     {
+      accessorKey: "ProcureurResponsable",
+      header: "النائب المكلف ",
+      cell: ({ row }) => {
+        const currentEtude = row.original.Etude ?row.original.Etude[0] : null 
+        if (currentEtude != null) {
+          let Procecuteur = `${currentEtude.ProsecutorResponsables?.nom}  ${currentEtude.ProsecutorResponsables?.prenom}`;
+          return (
+            <div className="text-right">
+              {Procecuteur.toString()}
+            </div>
+          )
+        } else {
+          let Procecuteur = ""
+          return (
+            <div className="text-right">
+              {Procecuteur ? Procecuteur : "---"}
+            </div>
+          )
+        }
+
+      },
+    },
+    {
       accessorKey: "CodeBarre",
       header: "رقم المضمون",
       cell: ({ row }) => <div className="text-right">{row.getValue("CodeBarre")}</div>,
@@ -126,11 +150,11 @@ export function MessageriesTable<TData extends Messagerie>({
           String(row.getValue(id)).includes(String(value));
       }
     },
-    {
-      accessorKey: "CodeReference",
-      header: "رقم المرجع",
-      cell: ({ row }) => <div className="text-right">{row.getValue("CodeReference")}</div>,
-    },
+    // {
+    //   accessorKey: "CodeReference",
+    //   header: "رقم المرجع",
+    //   cell: ({ row }) => <div className="text-right">{row.getValue("CodeReference")}</div>,
+    // },
     {
       accessorKey: "DateMessage",
       header: "تاريخ الرسالة",

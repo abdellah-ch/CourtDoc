@@ -21,7 +21,7 @@ const { RangePicker } = DatePicker
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D']
 
-export default function StatisticsPage({ params }: { params: { id: string } }) {
+export default function StatisticsPage() {
   const [stats, setStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
