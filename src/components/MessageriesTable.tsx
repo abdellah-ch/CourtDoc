@@ -52,6 +52,8 @@ interface Messagerie {
   IdCode: number
   IdSource: number | null
   IdFiliere: number | null
+  participants_courrier: string
+  underSupervision: boolean
   Sources?: {
     NomSource: string
   }
@@ -119,10 +121,19 @@ export function MessageriesTable<TData extends Messagerie>({
       }
     },
     {
+      accessorKey: "CodeBarre",
+      header: "رقم المضمون",
+      cell: ({ row }) => <div className="text-right">{row.getValue("CodeBarre") || "---"}</div>,
+      filterFn: (row, id, value) => {
+        return value === undefined ||
+          String(row.getValue(id)).includes(String(value));
+      }
+    },
+    {
       accessorKey: "ProcureurResponsable",
       header: "النائب المكلف ",
       cell: ({ row }) => {
-        const currentEtude = row.original.Etude ?row.original.Etude[0] : null 
+        const currentEtude = row.original.Etude ? row.original.Etude[0] : null
         if (currentEtude != null) {
           let Procecuteur = `${currentEtude.ProsecutorResponsables?.nom}  ${currentEtude.ProsecutorResponsables?.prenom}`;
           return (
@@ -141,20 +152,16 @@ export function MessageriesTable<TData extends Messagerie>({
 
       },
     },
+
     {
-      accessorKey: "CodeBarre",
-      header: "رقم المضمون",
-      cell: ({ row }) => <div className="text-right">{row.getValue("CodeBarre")}</div>,
+      accessorKey: "participants_courrier",
+      header: "أطراف المراسلة ",
+      cell: ({ row }) => <div className="text-right">{row.getValue("participants_courrier") || "---"}</div>,
       filterFn: (row, id, value) => {
         return value === undefined ||
           String(row.getValue(id)).includes(String(value));
       }
     },
-    // {
-    //   accessorKey: "CodeReference",
-    //   header: "رقم المرجع",
-    //   cell: ({ row }) => <div className="text-right">{row.getValue("CodeReference")}</div>,
-    // },
     {
       accessorKey: "DateMessage",
       header: "تاريخ الرسالة",
@@ -341,6 +348,14 @@ export function MessageriesTable<TData extends Messagerie>({
             value={(table.getColumn("Sujet")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
               table.getColumn("Sujet")?.setFilterValue(event.target.value)
+            }
+            className="max-w-xs"
+          />
+          <Input
+            placeholder="الطرف المعني..."
+            value={(table.getColumn("participants_courrier")?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              table.getColumn("participants_courrier")?.setFilterValue(event.target.value)
             }
             className="max-w-xs"
           />

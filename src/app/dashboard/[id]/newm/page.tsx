@@ -48,9 +48,9 @@ const formSchema = z.object({
   IdTypeSource: z.string().min(1, "حقل مطلوب"),
   idProsecutor: z.string().optional(),
   idCode: z.string().min(1, "حقل مطلوب"),
-  idSource: z.string().min(1, "حقل مطلوب"),
+  idSource: z.string().optional(),
   idSourceDestination: z.string().optional(),
-  AutreLibelleSource: z.string().min(0, "حفل مطلوب"),
+  AutreLibelleSource: z.string().optional(),
   AutreLibelleDestination: z.string().optional(),
   IdTypeDestination: z.string().optional(),
   underSupervision: z.boolean().default(false).optional(),
@@ -158,7 +158,9 @@ export default function AddMessagerieForm() {
     try {
       // Call your createMessagerie function
       const response = await createMessagerie(messagerieData);
-
+      const data = await response
+      console.log(data.IdMessagerie);
+      const idM = data.IdMessagerie 
       // Handle success
       toast.success("تم حفظ الإرسالية بنجاح");
 
@@ -167,7 +169,7 @@ export default function AddMessagerieForm() {
       // router.push('/messageries');
 
       // console.log("Messagerie created:", response);
-      // router.push(`/dashboard/${id}/record`)
+      router.push(`/dashboard/${id}/messagerie/${idM}`)
       setIsDisabled(false)
     } catch (error) {
       // console.error("Error creating messagerie:", error);

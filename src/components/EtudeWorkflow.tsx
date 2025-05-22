@@ -11,9 +11,16 @@ import { toast } from 'sonner';
 import { Textarea } from "@/components/ui/textarea";
 import { SearchableSelect } from "@/components/SearchableSelect";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Edit, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog"
 
 export function EtudeWorkflow({ message, refreshData, prosecutors }: {
   message: any;
@@ -21,7 +28,15 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
   prosecutors: any[];
 }) {
   const [messagerieStatus, setMessagerieStatus] = useState<string>("");
-
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [etudeToEdit, setEtudeToEdit] = useState<any>(null);
+  const [editStudyDate, setEditStudyDate] = useState("");
+  const [editProsecutor, setEditProsecutor] = useState("");
+  const [editDecision, setEditDecision] = useState("");
+  const [editDateDecision, setEditDateDecision] = useState("");
+  const [editDateRetour, setEditDateRetour] = useState("");
+  const [editSourceType, setEditSourceType] = useState("");
+  const [editSource, setEditSource] = useState("");
   const [newStudyDate, setNewStudyDate] = useState<string>("");
   const [selectedProsecutor, setSelectedProsecutor] = useState<string>("");
   const [decision, setDecision] = useState<string>("");
@@ -32,7 +47,61 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
   const [selectedSourceType, setSelectedSourceType] = useState<string>("");
   const [sources, setSources] = useState<any[]>([]);
   const [selectedSource, setSelectedSource] = useState<string>("");
+
+  const openEditModal = (etude: any) => {
+    setEtudeToEdit(etude);
+    setEditStudyDate(format(new Date(etude.DateEtude), "yyyy-MM-dd"));
+    setEditProsecutor(etude.IdProsecutor?.toString() || "");
+    setEditDecision(etude.decision || "");
+    setEditDateDecision(etude.DateDecision ? format(new Date(etude.DateDecision), "yyyy-MM-dd") : "");
+    setEditDateRetour(etude.DateRetour ? format(new Date(etude.DateRetour), "yyyy-MM-dd") : "");
+    setEditSourceType(etude.IdSource?.toString() || "");
+    setEditSource(etude.IdSource?.toString() || "");
+    setEditModalOpen(true);
+  };
+
+  // Function to handle etude update
+  const handleUpdateEtude = async () => {
+    setIsLoading(true);
+    try {
+      const updateData: any = {
+        DateEtude: new Date(editStudyDate),
+      };
+
+      if (etudeToEdit.Etude) {
+        // Only allow updating prosecutor for active etudes
+        updateData.IdProsecutor = editProsecutor ? parseInt(editProsecutor) : null;
+      } else {
+        // Allow updating all fields for completed etudes
+        updateData.IdProsecutor = editProsecutor ? parseInt(editProsecutor) : null;
+        updateData.decision = editDecision;
+        updateData.DateDecision = editDateDecision ? new Date(editDateDecision) : null;
+        updateData.DateRetour = editDateRetour ? new Date(editDateRetour) : null;
+        updateData.IdSource = editSource ? parseInt(editSource) : null;
+      }
+
+      await fetch(`/api/updateEtude/${etudeToEdit.IdEtude}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData)
+      });
+
+      refreshData(prev => !prev);
+      toast.success("تم تحديث الدراسة بنجاح");
+      setEditModalOpen(false);
+    } catch (error) {
+      console.error('Error updating etude:', error);
+      toast.error("حدث خطأ أثناء تحديث الدراسة");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
   useEffect(() => {
+    if (message) {
+      console.log(message)
+    }
     if (message?.Statut) {
       setMessagerieStatus(message.Statut);
     }
@@ -80,6 +149,8 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
     const activeEtude = message.Etude?.find((e: any) => e.Etude) ||
       (message.Etude?.length > 0 ? message.Etude[message.Etude.length - 1] : null);
     setCurrentEtude(activeEtude);
+    console.log("activeEtude", activeEtude);
+
   }, [message.Etude]);
 
   const router = useRouter();
@@ -87,78 +158,78 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
   const id = params.id; // This gets the id from the URL
 
   const handleStudyAction = async () => {
-  if (!newStudyDate) return;
+    if (!newStudyDate) return;
 
-  setIsLoading(true);
-  try {
-    if (currentEtude?.Etude) {
-      if (!decision) {
-        toast.warning("يجب إدخال قرار الدراسة");
-        return;
-      }
+    setIsLoading(true);
+    try {
+      if (currentEtude?.Etude) {
+        if (!decision) {
+          toast.warning("يجب إدخال قرار الدراسة");
+          return;
+        }
 
-      // Update Etude
-      await fetch(`/api/etude/${currentEtude.IdEtude}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          DateDecision: dateDecision,
-          DateRetour: newStudyDate,
-          decision,
-          IdSource: selectedSource || null
-        })
-      });
-
-      // Update Messagerie status if selected
-      if (messagerieStatus) {
-        await fetch(`/api/messagerie/${message.IdMessagerie}`, {
+        // Update Etude
+        await fetch(`/api/etude/${currentEtude.IdEtude}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            statut: messagerieStatus
+            DateDecision: dateDecision,
+            DateRetour: newStudyDate,
+            decision,
+            IdSource: selectedSource || null
+          })
+        });
+
+        // Update Messagerie status if selected
+        if (messagerieStatus) {
+          await fetch(`/api/messagerie/${message.IdMessagerie}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              statut: messagerieStatus
+            })
+          });
+        }
+      } else {
+        if (!selectedProsecutor) {
+          toast.warning("يجب اختيار النائب المكلف بالدراسة");
+          return;
+        }
+
+        await fetch('/api/etude', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            IdMessagerie: message.IdMessagerie,
+            DateEtude: newStudyDate,
+            IdProsecutor: selectedProsecutor
           })
         });
       }
-    } else {
-      if (!selectedProsecutor) {
-        toast.warning("يجب اختيار النائب المكلف بالدراسة");
-        return;
-      }
 
-      await fetch('/api/etude', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          IdMessagerie: message.IdMessagerie,
-          DateEtude: newStudyDate,
-          IdProsecutor: selectedProsecutor
-        })
-      });
+      refreshData((prev: boolean) => !prev);
+      setNewStudyDate("");
+      setSelectedProsecutor("");
+      setDecision("");
+      setSelectedSourceType("");
+      setSelectedSource("");
+      toast.success("تم تحديث حالة الدراسة بنجاح");
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error("حدث خطأ أثناء حفظ التغييرات");
+    } finally {
+      setIsLoading(false);
     }
-
-    refreshData((prev: boolean) => !prev);
-    setNewStudyDate("");
-    setSelectedProsecutor("");
-    setDecision("");
-    setSelectedSourceType("");
-    setSelectedSource("");
-    toast.success("تم تحديث حالة الدراسة بنجاح");
-  } catch (error) {
-    console.error('Error:', error);
-    toast.error("حدث خطأ أثناء حفظ التغييرات");
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   return (
     <Card>
       <CardHeader className="border-b">
-        <CardTitle className="text-xl">القرارات</CardTitle>
+        <CardTitle className="text-xl">سجل القرارات</CardTitle>
       </CardHeader>
       <CardContent className="p-6 space-y-6">
         {/* Current Status */}
-        <div className="border p-4 rounded-lg space-y-4">
+        {/* <div className="border p-4 rounded-lg space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="font-medium">الحالة الحالية</h3>
             {currentEtude ? (
@@ -214,7 +285,7 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
               )}
             </div>
           )}
-        </div>
+        </div> */}
 
         {/* Action Form */}
         <div className="border p-4 rounded-lg space-y-4">
@@ -308,9 +379,6 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
                       />
                     </div>
                   )}
-
-
-
                 </>
               )}
             </div>
@@ -333,7 +401,6 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
               <div className="space-y-2 w-full">
                 <Label>اختيار النائب المكلف *</Label>
                 <div className='w-[20%]'>
-
                   <SearchableSelect
                     items={prosecutors}
                     value={selectedProsecutor}
@@ -346,7 +413,6 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
                       </div>
                     )}
                   />
-
                 </div>
                 {/* <Select
                   value={selectedProsecutor}
@@ -370,6 +436,14 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
             ) : null}
 
             <div className="flex justify-end gap-2 pt-2">
+              <Button
+                variant="outline"
+                onClick={() => { router.push(`/dashboard/${id}/newm`); }}
+                className="gap-2"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                إضافة مراسلة جديدة
+              </Button>
               <Button
                 variant="outline"
                 onClick={() => {
@@ -396,15 +470,225 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
           </div>
         </div>
       </CardContent>
+
+      {/* Study History */}
+      <div className="border p-4 rounded-lg space-y-4">
+        <h3 className="font-medium">سجل الدراسات السابقة</h3>
+        <div className="space-y-3">
+
+          {message.Etude?.length > 0 ? (
+            [...message.Etude]
+              .sort((a: any, b: any) => new Date(b.DateEtude).getTime() - new Date(a.DateEtude).getTime())
+              .map((etude) => (
+                <div key={etude.IdEtude} className="border p-4 rounded-lg space-y-3 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">
+                        {format(new Date(etude.DateEtude), "dd/MM/yyyy")}
+                      </span>
+                      {etude.DateRetour && (
+                        <>
+                          <span className="text-muted-foreground">→</span>
+                          <span className="font-medium">
+                            {format(new Date(etude.DateRetour), "dd/MM/yyyy")}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                    <Badge variant={etude.Etude ? "destructive" : "default"}>
+                      {etude.Etude ? "قيد الدراسة" : "منجزة"}
+                    </Badge>
+                  </div>
+
+                  <div className='flex justify-between items-center'>
+                    {etude.ProsecutorResponsables && (
+                      <div className='flex gap-10'>
+                        {etude.decision && (
+                          <div className='flex gap-10'>
+                            <div className="space-y-1">
+                              <Label className="text-muted-foreground text-sm">قرار الدراسة</Label>
+                              <p className="whitespace-pre-line">{etude.decision}</p>
+                            </div>
+                            <div className="space-y-1">
+                              <Label className="text-muted-foreground text-sm">المرسل اليه</Label>
+                              <p className="whitespace-pre-line">{etude.Sources.NomSource}</p>
+                            </div>
+                          </div>
+                        )}
+                        <div className="space-y-1">
+                          <Label className="text-muted-foreground text-sm">النائب المكلف</Label>
+                          <p>
+                            {etude.ProsecutorResponsables.prenom} {etude.ProsecutorResponsables.nom}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className='flex gap-2'>
+                      <Button
+                        variant="outline"
+                        className="text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700 gap-1"
+                        onClick={() => {
+                          fetch(`/api/deleteEtude/${etude.IdEtude}`).then((res: any) => {
+                            refreshData((prev: boolean) => !prev)
+                          })
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        حذف
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        className="text-blue-600 border-blue-300 hover:bg-blue-50 hover:text-blue-700 gap-1"
+                        onClick={() => openEditModal(etude)}
+
+                      >
+                        <Edit className="h-4 w-4" />
+                        تعديل
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))
+          ) : (
+            <p className="text-muted-foreground text-center py-4">
+              لا يوجد سجل دراسات سابقة
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Edit Modal */}
+      <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
+        <DialogContent className="sm:max-w-[625px]">
+          <DialogHeader>
+            <DialogTitle>تعديل الدراسة</DialogTitle>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="editStudyDate">تاريخ الدراسة *</Label>
+              <Input
+                id="editStudyDate"
+                type="date"
+                value={editStudyDate}
+                onChange={(e) => setEditStudyDate(e.target.value)}
+                required
+              />
+            </div>
+
+            {etudeToEdit?.Etude ? (
+              null
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="editProsecutor">النائب المكلف *</Label>
+                  <SearchableSelect
+                    items={prosecutors}
+                    value={editProsecutor}
+                    onValueChange={setEditProsecutor}
+                    placeholder="اختر النائب..."
+                    searchPlaceholder="ابحث عن النائب..."
+                    renderItem={(source: any) => (
+                      <div>
+                        <span>{source.nom} {source.prenom}</span>
+                      </div>
+                    )}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="editDateDecision">تاريخ القرار</Label>
+                  <Input
+                    id="editDateDecision"
+                    type="date"
+                    value={editDateDecision}
+                    onChange={(e) => setEditDateDecision(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="editDateRetour">تاريخ الإرجاع</Label>
+                  <Input
+                    id="editDateRetour"
+                    type="date"
+                    value={editDateRetour}
+                    onChange={(e) => setEditDateRetour(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="editDecision">قرار الدراسة</Label>
+                  <Textarea
+                    id="editDecision"
+                    value={editDecision}
+                    onChange={(e) => setEditDecision(e.target.value)}
+                    placeholder="أدخل قرار الدراسة..."
+                  />
+                </div>
+                <div className="space-y-2 w-full">
+                  <Label>اختيار نوع المرسل إليه</Label>
+                  <Select
+                    value={selectedSourceType}
+                    onValueChange={(value) => {
+                      setSelectedSourceType(value);
+                      setSelectedSource(""); // Reset source when type changes
+                    }}
+                  >
+                    <SelectTrigger className="w-full" dir='rtl'>
+                      <SelectValue placeholder="اختر نوع المرسل إليه..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sourceTypes.map((type) => (
+                        <SelectItem
+                          key={type.IdTypeSource}
+                          value={type.IdTypeSource.toString()}
+                        >
+                          {type.Libelle}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {editSourceType && (
+                  <div className="space-y-2">
+                    <Label>اختيار المرسل إليه</Label>
+                    <SearchableSelect
+                      items={sources}
+                      value={editSource}
+                      onValueChange={setEditSource}
+                      placeholder="اختر المرسل إليه "
+                      searchPlaceholder="ابحث عن المرسل إليه..."
+                      renderItem={(source: any) => (
+                        <div>
+                          <span>{source.NomSource}</span>
+                        </div>
+                      )}
+                    />
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setEditModalOpen(false)}
+              disabled={isLoading}
+            >
+              إلغاء
+            </Button>
+            <Button
+              onClick={handleUpdateEtude}
+              disabled={isLoading || !editStudyDate ||
+                (etudeToEdit?.Etude && !editProsecutor)}
+            >
+              {isLoading ? "جاري الحفظ..." : "حفظ التغييرات"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <CardFooter className='flex justify-end'>
-        <Button
-          variant="ghost"
-          onClick={() => { router.push(`/dashboard/${id}/newm`); }}
-          className="gap-2"
-        >
-          <ChevronLeft className="h-4 w-4" />
-          إضافة مراسلة جديدة
-        </Button>
+
       </CardFooter>
     </Card>
   );

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@/generated/prisma/client";
-import { revalidatePath } from "next/cache";
 
 const prisma = new PrismaClient()
 

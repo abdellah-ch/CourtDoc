@@ -18,7 +18,9 @@ export async function POST(request: Request) {
       idSource,
       idSourceDestination,
       AutreLibelleDestination,
-      AutreLibelleSource
+      AutreLibelleSource,
+      underSupervision,
+      participants_courrier
     } = await request.json();
 
     // 1. Fetch the related CodeFiliere to get the Valeur (code) and IdFiliere
@@ -81,7 +83,9 @@ export async function POST(request: Request) {
         AutreLibelleSource: AutreLibelleSource,
         IdFiliere: idFiliere,
         AddedDate: new Date(),
-        IsDeleted: false
+        IsDeleted: false,
+        underSupervision,
+        participants_courrier
       }
     });
 

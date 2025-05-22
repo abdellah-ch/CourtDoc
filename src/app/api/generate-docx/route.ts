@@ -2,6 +2,7 @@ import docxTemplates from 'docx-templates';
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { format } from 'date-fns';
 
 export async function POST(request: NextRequest) {
     // 1. Get message data from request body
@@ -22,12 +23,14 @@ export async function POST(request: NextRequest) {
 
     // 4. Prepare template data
     const data = {
-        NumeroM: message.NumeroMessagerie || '',
+        NumeroO: `${message.NumeroOrdre}/1/2025` || '',
         // Updated to use Etude's source instead of Messagerie's destination
         SoureceDes: latestEtude?.Sources?.NomSource ||
             latestEtude?.IdSource || '', // Fallback to ID if name not available
-        dateCreat : message.AddedDate || '',
+        dateCreat: format(message.AddedDate, "yyyy-MM-dd") || '',
         SujetMessaj: message.Sujet || '',
+        NumeroM: message.NumeroMessagerie || '',
+        dateM:  format(message.DateMessage, "yyyy-MM-dd")|| '',
         decision: latestEtude?.decision || ''
     };
 

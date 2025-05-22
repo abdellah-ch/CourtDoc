@@ -27,8 +27,6 @@ export function SearchableSelect({
         ).slice(0, 6) // Limit to 6 items
     }, [items, searchTerm])
 
-
-
     return (
         <Select value={value} onValueChange={onValueChange} >
             <SelectTrigger dir='rtl' className='cursor-pointer w-full'>
@@ -45,7 +43,6 @@ export function SearchableSelect({
                         onChange={(e) => setSearchTerm(e.target.value)}
                         onClick={(e) => e.stopPropagation()}
                         onKeyDown={(e) => e.stopPropagation()} // ADD THIS LINE
-
                     />
                 </div>
                 <div dir='rtl' className="max-h-[300px] overflow-y-auto">

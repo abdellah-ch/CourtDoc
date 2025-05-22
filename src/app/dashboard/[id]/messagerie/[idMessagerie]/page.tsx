@@ -57,7 +57,7 @@ export default function MessageDetailPage() {
   const { idMessagerie } = useParams();
   const router = useRouter();
   const [message, setMessage] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState("message");
+  const [activeTab, setActiveTab] = useState("etude");
   const [isEditing, setIsEditing] = useState(false);
   const [isResultEditing, setIsResultEditing] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
