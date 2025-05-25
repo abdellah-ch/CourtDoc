@@ -19,6 +19,7 @@ export async function POST(request: Request) {
       idSourceDestination,
       AutreLibelleDestination,
       AutreLibelleSource,
+      TypeDocument,
       underSupervision,
       participants_courrier
     } = await request.json();
@@ -85,6 +86,7 @@ export async function POST(request: Request) {
         AddedDate: new Date(),
         IsDeleted: false,
         underSupervision,
+        TypeDocument,
         participants_courrier
       }
     });

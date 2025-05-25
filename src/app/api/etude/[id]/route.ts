@@ -8,7 +8,7 @@ export async function PATCH(
   { params }: any
 ) {
   try {
-    const { DateRetour, decision, DateDecision,IdSource } = await request.json();
+    const { DateRetour, decision, DateDecision, IdSource, AutreLibelleSource } = await request.json();
     const {id} = await params
     const updatedEtude = await prisma.etude.update({
       where: { IdEtude: Number(id) },
@@ -17,7 +17,8 @@ export async function PATCH(
         DateDecision: DateDecision ? new Date(DateDecision) : null,
         Etude: false, // Always false when returning
         decision,
-        IdSource: IdSource ? Number(IdSource) : null
+        IdSource: IdSource ? Number(IdSource) : null,
+        AutreLibelleSource: AutreLibelleSource ? AutreLibelleSource : null
       },
       include: {
         Messageries: true,

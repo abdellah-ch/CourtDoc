@@ -49,7 +49,7 @@ export function SearchableSelect({
                     {filteredItems.length > 0 ? (
                         filteredItems.map(item => (
                             <SelectItem
-                                key={item.IdUtilisateur || item.IdFiliere || item.IdGroupeFiliere || item.IdSource || item.IdResponsable}
+                                key={item.IdUtilisateur || item.IdFiliere || item.IdGroupeFiliere || item.IdSource || item.IdResponsable  }
                                 value={item.IdUtilisateur?.toString() || item.IdFiliere?.toString() || item.IdGroupeFiliere?.toString() || item.IdSource?.toString() || item.IdResponsable?.toString() }
                                 className='cursor-pointer'
                             >

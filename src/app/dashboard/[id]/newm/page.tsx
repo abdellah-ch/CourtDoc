@@ -36,6 +36,7 @@ import { SearchableSelect } from "@/components/SearchableSelect";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
+
   CodeReference: z.string().optional(),
   NumeroMessagerie: z.string().optional(),
   CodeBarre: z.string().optional(),
@@ -54,6 +55,7 @@ const formSchema = z.object({
   AutreLibelleDestination: z.string().optional(),
   IdTypeDestination: z.string().optional(),
   underSupervision: z.boolean().default(false).optional(),
+  TypeDocument: z.string().min(1, "حقل مطلوب"),
   participants_courrier: z.string().optional(), // or add any specific validation you need
 
 
@@ -82,6 +84,7 @@ export default function AddMessagerieForm() {
       idCode: "",
       idSource: "",
       AutreLibelleSource: "",
+      TypeDocument: "",
       participants_courrier: "",
       underSupervision: false,
     },
@@ -601,6 +604,28 @@ export default function AddMessagerieForm() {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="TypeDocument"
+              render={({ field }) => (
+                <FormItem className="text-right">
+                  <FormLabel>نوع المراسلة</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger dir="rtl" className="w-full cursor-pointer">
+                        <SelectValue placeholder="نوع المراسلة" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent dir="rtl" >
+                      <SelectItem value="إرسالية">إرسالية</SelectItem>
+                      <SelectItem value="كتاب"> كتاب</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="participants_courrier"

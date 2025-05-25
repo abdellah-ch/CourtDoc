@@ -47,7 +47,7 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
   const [selectedSourceType, setSelectedSourceType] = useState<string>("");
   const [sources, setSources] = useState<any[]>([]);
   const [selectedSource, setSelectedSource] = useState<string>("");
-
+  const [AutreLibelleSource, setAutreLibelleSource] = useState<string>('')
   const openEditModal = (etude: any) => {
     setEtudeToEdit(etude);
     setEditStudyDate(format(new Date(etude.DateEtude), "yyyy-MM-dd"));
@@ -78,6 +78,7 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
         updateData.DateDecision = editDateDecision ? new Date(editDateDecision) : null;
         updateData.DateRetour = editDateRetour ? new Date(editDateRetour) : null;
         updateData.IdSource = editSource ? parseInt(editSource) : null;
+        updateData.AutreLibelleSource = AutreLibelleSource ? AutreLibelleSource : null
       }
 
       await fetch(`/api/updateEtude/${etudeToEdit.IdEtude}`, {
@@ -176,7 +177,8 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
             DateDecision: dateDecision,
             DateRetour: newStudyDate,
             decision,
-            IdSource: selectedSource || null
+            IdSource: selectedSource || null,
+            AutreLibelleSource
           })
         });
 
@@ -362,7 +364,7 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
                     </Select>
                   </div>
 
-                  {selectedSourceType && (
+                  {(Number(selectedSourceType) != 5) ? (
                     <div className="space-y-2 w-fit">
                       <Label>اختيار المرسل إليه</Label>
                       <SearchableSelect
@@ -378,7 +380,17 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
                         )}
                       />
                     </div>
-                  )}
+                  ) :
+                    (
+                      <div className='space-y-2 flext'>
+                        <Label> المرسل إليه </Label>
+                        <Input
+                          placeholder='المرسل إليه '
+                          onChange={(e) => { setAutreLibelleSource(e.target.value) }}
+                        />
+                      </div>
+                    )
+                  }
                 </>
               )}
             </div>
@@ -511,7 +523,7 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
                             </div>
                             <div className="space-y-1">
                               <Label className="text-muted-foreground text-sm">المرسل اليه</Label>
-                              <p className="whitespace-pre-line">{etude.Sources.NomSource}</p>
+                              <p className="whitespace-pre-line">{etude.Sources?.NomSource || etude.AutreLibelleSource}</p>
                             </div>
                           </div>
                         )}
@@ -648,7 +660,7 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
                     </SelectContent>
                   </Select>
                 </div>
-                {editSourceType && (
+                {(editSourceType && Number(selectedSourceType) != 5 ) ? (
                   <div className="space-y-2">
                     <Label>اختيار المرسل إليه</Label>
                     <SearchableSelect
@@ -664,6 +676,17 @@ export function EtudeWorkflow({ message, refreshData, prosecutors }: {
                       )}
                     />
                   </div>
+                ): (
+                      
+                        <div className='space-y-2 flext'>
+                          <Label> المرسل إليه </Label>
+                          <Input
+                            placeholder='المرسل إليه '
+                            onChange={(e) => { setAutreLibelleSource(e.target.value) }}
+                          />
+                        </div>
+                      
+                  
                 )}
               </>
             )}

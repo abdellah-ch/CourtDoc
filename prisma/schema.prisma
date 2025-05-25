@@ -33,6 +33,7 @@ model Etude {
   decision               String?                 @db.NVarChar(100)
   DateDecision           DateTime?               @db.Date
   IdSource               Int?
+  AutreLibelleSource     String?                 @db.NVarChar(Max)
   Messageries            Messageries             @relation(fields: [IdMessagerie], references: [IdMessagerie], onUpdate: NoAction, map: "FK__Etude__IdMessage__5EBF139D")
   ProsecutorResponsables ProsecutorResponsables? @relation(fields: [IdProsecutor], references: [IdResponsable], onDelete: NoAction, onUpdate: NoAction, map: "FK_Etude_ProsecutorResponsables")
   Sources                Sources?                @relation(fields: [IdSource], references: [IdSource], onDelete: NoAction, onUpdate: NoAction, map: "FK_Etude_Sources")
@@ -85,6 +86,7 @@ model Messageries {
   AutreLibelleDestination                                         String?           @db.NVarChar(35)
   underSupervision                                                Boolean?
   participants_courrier                                           String?           @db.NVarChar(Max)
+  TypeDocument                                                    String?           @db.NVarChar(20)
   Etude                                                           Etude[]
   MessagerieLinks_MessagerieLinks_IdMessagerieSourceToMessageries MessagerieLinks[] @relation("MessagerieLinks_IdMessagerieSourceToMessageries")
   MessagerieLinks_MessagerieLinks_IdMessagerieCibleToMessageries  MessagerieLinks[] @relation("MessagerieLinks_IdMessagerieCibleToMessageries")

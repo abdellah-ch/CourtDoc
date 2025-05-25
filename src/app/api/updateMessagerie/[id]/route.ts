@@ -12,7 +12,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         where:{
             IdMessagerie:Number(id)
         },
-        data:data.editedData
+        data:data,
+        
     })
         console.log(updatedData);
         

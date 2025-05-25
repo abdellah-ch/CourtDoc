@@ -47,11 +47,12 @@ import { Label } from "@/components/ui/label";
 import { MessageFormModal } from "@/components/MessageFormModal";
 import { DeleteAlert } from "@/components/DeleteAlert";
 import { toast } from "sonner";
-import { Messageries } from "@/generated/prisma";
+import { Messageries, TypeMessageries } from "@/generated/prisma";
 import { EtudeWorkflow } from "@/components/EtudeWorkflow";
 import { MessageLinksManager } from "@/components/MessageLinksManager";
 import { fetchMessageriesByFiliere, fetchResponsables } from "@/lib/FetchMessagerieInfo";
 import { saveAs } from 'file-saver';
+import { SearchableSelect } from "@/components/SearchableSelect";
 
 export default function MessageDetailPage() {
   const { idMessagerie } = useParams();
@@ -65,9 +66,94 @@ export default function MessageDetailPage() {
   const [refresh, setRefresh] = useState<boolean>(false);
   const [editedData, setEditedData] = useState<Partial<Messageries>>({});
   const [resultat, setResultat] = useState("");
-
   const [responsable, setResponsable] = useState([]);
   const [messageries, setMessageries] = useState<any[]>([]);
+  const [selectedSourceType, setSelectedSourceType] = useState<string>(message?.IdSource?.toString() || "");
+  const [sourceTypes, setSourceTypes] = useState<any[]>([]);
+  const [sources, setSources] = useState<any[]>([]);
+  const [sourcesDestination, setSourcesDestination] = useState<any[]>([]);
+
+  const [selectedSource, setSelectedSource] = useState<string>(message?.IdSource?.toString() || "");
+  const [AutreLibelleSource, setAutreLibelleSource] = useState<string>("");
+  const [AutreLibelleSourceDestination, setAutreLibelleSourceDestination] = useState<string>("");
+
+  const [selectedSourceDestinationType, setSelectedSourceDestinationType] = useState<string>(message?.IdSourceDestination?.toString() || "");
+  const [selectedSourceDestination, setSelectedSourceDestination] = useState<string>(message?.IdSourceDestination?.toString() || "");
+  const [messageTypes, setMessageTypes] = useState<TypeMessageries[]>([]);
+
+  useEffect(() => {
+    const fetchMessageTypes = async () => {
+      const response = await fetch('/api/MessageTypes');
+      const data = await response.json();
+      setMessageTypes(data);
+    };
+    fetchMessageTypes();
+  }, []);
+
+  const getTypeLibelle = (idType?: number) => {
+    if (!idType) return "---";
+    const type = messageTypes.find(t => t.IdType === idType);
+    return type?.Libelle || "---";
+  };
+  // Fetch source types on component mount
+  useEffect(() => {
+    const fetchSourceTypes = async () => {
+      try {
+        const response = await fetch('/api/source-types');
+        if (!response.ok) throw new Error('Failed to fetch source types');
+        const data = await response.json();
+        setSourceTypes(data);
+      } catch (error) {
+        console.error('Error fetching source types:', error);
+        toast.error('حدث خطأ أثناء جلب أنواع المصادر');
+      }
+    };
+
+    fetchSourceTypes();
+  }, []);
+
+  // Fetch sources when source type is selected
+  useEffect(() => {
+    const fetchSourcesByType = async () => {
+      if (!selectedSourceType) {
+        setSources([]);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/sources?typeId=${selectedSourceType}`);
+        if (!response.ok) throw new Error('Failed to fetch sources');
+        const data = await response.json();
+        setSources(data);
+      } catch (error) {
+        console.error('Error fetching sources:', error);
+        toast.error('حدث خطأ أثناء جلب المصادر');
+      }
+    };
+    
+    fetchSourcesByType();
+  }, [selectedSourceType]);
+
+  useEffect(() => {
+    
+    const fetchSourcesDestinationByType = async () => {
+      if (!selectedSourceDestinationType) {
+        setSourcesDestination([]);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/sources?typeId=${selectedSourceType}`);
+        if (!response.ok) throw new Error('Failed to fetch sources');
+        const data = await response.json();
+        setSourcesDestination(data);
+      } catch (error) {
+        console.error('Error fetching sources:', error);
+        toast.error('حدث خطأ أثناء جلب المصادر');
+      }
+    };
+    fetchSourcesDestinationByType();
+  }, [selectedSourceDestinationType]);
   const params = useParams();
   // console.log(params.id);
 
@@ -115,20 +201,22 @@ export default function MessageDetailPage() {
     setEditedData(prev => ({ ...prev, [field]: value }));
   };
 
+
+
+
   const handleSaveChanges = () => {
     setIsEditing(false);
-    // console.log("Changes to save:", editedData);
+
+    console.log("###########-----------", editedData);
+
     fetch(`/api/updateMessagerie/${idMessagerie}`, {
       method: "PUT",
-      body: JSON.stringify({
-        editedData
-      })
+      body: JSON.stringify(editedData)
     }).then((res) => {
-      // console.log(res);
       setRefresh((prev) => !prev)
       toast.success("تم التحديث بنجاح")
     })
-    // Implement your save logic here
+
   };
 
 
@@ -146,6 +234,26 @@ export default function MessageDetailPage() {
         toast.error("error", err)
       })
   };
+
+  const handleDownloadFolder = async () => {
+    try {
+      const response = await fetch('/api/generate-Messagerie-docx', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message }), // Send the entire message object
+      });
+
+      if (!response.ok) throw new Error('Failed to generate document');
+
+      const blob = await response.blob();
+      const filename = `folder-document.docx`;
+      saveAs(blob, filename);
+
+    } catch (error) {
+      toast.error('فشل في إنشاء الوثيقة');
+      console.error('Download error:', error);
+    }
+  }
 
   const handleDownload = async () => {
     try {
@@ -228,13 +336,13 @@ export default function MessageDetailPage() {
           </Button>
         </>
         <div className="flex gap-2">
-          <Button variant="outline" className="gap-2">
-            <Printer className="h-4 w-4" />
-            طباعة
+          <Button variant="outline" className="gap-2" onClick={handleDownloadFolder}>
+            <Download className="h-4 w-4" />
+            تحميل ملف المراسلة
           </Button>
           <Button variant="outline" className="gap-2" onClick={handleDownload}>
             <Download className="h-4 w-4" />
-            تصدير
+            تحميل المراسلة
           </Button>
         </div>
       </div>
@@ -339,7 +447,6 @@ export default function MessageDetailPage() {
         <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Column 1 */}
           <div className="space-y-4">
-
             {/* Message Type */}
             <div className="bg-white p-3 rounded-lg">
               <Label className="block text-sm font-medium text-gray-600 mb-1">طبيعة المراسلة</Label>
@@ -347,11 +454,12 @@ export default function MessageDetailPage() {
                 isEditing ? (<div className="w-full">
                   <Select
                     dir="rtl"
-                    defaultValue={message.TypeMessageries?.Libelle}
+                    // defaultValue={message.TypeMessageries?.Libelle}
+                    value={editedData.IdType?.toString() || message.IdType?.toString()}
                     onValueChange={(value) => handleChange('IdType', parseInt(value))}
                   >
                     <SelectTrigger className="bg-white border-gray-300 text-gray-800 w-full">
-                      {message.TypeMessageries?.Libelle}
+                      {getTypeLibelle(editedData.IdType ?? message.IdType)}
                     </SelectTrigger>
                     <SelectContent className="bg-white border-gray-200">
                       <SelectItem value="1" className="hover:bg-white">وارد</SelectItem>
@@ -361,6 +469,29 @@ export default function MessageDetailPage() {
                   </Select>
                 </div>) : (
                   <p className="text-gray-800 font-medium">{message.TypeMessageries?.Libelle || "---"}</p>
+                )
+              }
+            </div>
+
+            <div className="bg-white p-3 rounded-lg">
+              <Label className="block text-sm font-medium text-gray-600 mb-1">نوع المراسلة</Label>
+              {
+                isEditing ? (<div className="w-full">
+                  <Select
+                    dir="rtl"
+                    value={editedData.TypeDocument || message.TypeDocument}
+                    onValueChange={(value) => handleChange('TypeDocument', value)}
+                  >
+                    <SelectTrigger className="bg-white border-gray-300 text-gray-800 w-full">
+                      {editedData.TypeDocument || message.TypeDocument} {/* Fixed this line */}
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-gray-200">
+                      <SelectItem value="إرسالية" className="hover:bg-white">إرسالية</SelectItem>
+                      <SelectItem value="كتاب" className="hover:bg-white">كتاب</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>) : (
+                  <p className="text-gray-800 font-medium">{message.TypeDocument || "---"}</p>
                 )
               }
             </div>
@@ -396,8 +527,18 @@ export default function MessageDetailPage() {
 
           {/* Column 2 */}
           <div className="space-y-4">
-
-
+            <div className="bg-white p-3 rounded-lg">
+              <Label className="block text-sm font-medium text-gray-600 mb-1">اطراف المراسلة</Label>
+              {isEditing ? (
+                <Input
+                  defaultValue={message.participants_courrier || ""}
+                  onChange={(e) => handleChange('participants_courrier', e.target.value)}
+                  className="bg-white border-gray-300 text-gray-800"
+                />
+              ) : (
+                <p className="text-gray-800 font-medium">{message.participants_courrier || "---"}</p>
+              )}
+            </div>
 
 
             {/* Subject */}
@@ -435,32 +576,141 @@ export default function MessageDetailPage() {
 
           {/* Column 3 */}
           <div className="space-y-4">
-
-
-            {/* Source */}
             <div className="bg-white p-3 rounded-lg">
-              <Label className="block text-sm font-medium text-gray-600 mb-1">المصدر</Label>
-              <div className="bg-white p-3 rounded-lg">
-                <p className="text-gray-800 font-medium">{message.Sources?.NomSource || message.AutreLibelleSource}</p>
-              </div>
+            {/* Source */}
+            {(message.IdType === 1 || message.IdType === 3) && (
+              isEditing ? (
+                <div>
+                  {/* Type Source */}
+                  <div className="space-y-2 w-full">
+                      <Label className="block text-sm font-medium text-gray-600 mb-1">اختيار نوع المرسل</Label>
+                    <Select
+                      value={selectedSourceType}
+                      onValueChange={(value) => {
+                        setSelectedSource("");
+                        setSelectedSourceType(value);
+                      }}
+                    >
+                      <SelectTrigger className="w-full" dir="rtl">
+                        <SelectValue placeholder="اختر نوع المرسل ..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sourceTypes.map((type) => (
+                          <SelectItem
+                            key={type.IdTypeSource}
+                            value={type.IdTypeSource.toString()}
+                          >
+                            {type.Libelle}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {Number(selectedSourceType) != 5 && (
+                    <div className="space-y-2 w-full mt-6">
+                        <Label className="block text-sm font-medium text-gray-600 mb-1">اختيار المرسل</Label>
+                      <SearchableSelect
+                        items={sources}
+                        value={selectedSource}
+                        onValueChange={(value) => {
+                          setSelectedSource(value);
+                          handleChange('IdSource', Number(value));
+                        }}
+                        placeholder="اختر المرسل إليه"
+                        searchPlaceholder="ابحث عن المرسل إليه..."
+                        renderItem={(source: any) => (
+                          <div>
+                            <span>{source.NomSource}</span>
+                          </div>
+                        )}
+                      />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-white p-3 rounded-lg">
+                  <Label className="block text-sm font-medium text-gray-600 mb-1">المرسل</Label>
+                  <div className="bg-white p-3 rounded-lg">
+                    <p className="text-gray-800 font-medium">
+                      {message.Sources?.NomSource || message.AutreLibelleSource || "---"}
+                    </p>
+                  </div>
+                </div>
+              )
+            )}
             </div>
 
             {/* distination */}
+            <div className="bg-white p-3 rounded-lg">
+
             {
-              (message.IdType === 3) ? (
+              (message.IdType === 3 || message.IdType === 2) ? (
+                isEditing ? (
+                  <div>
+                    {/* Type Source */}
+                    <div className="space-y-2 w-full">
+                        <Label className="block text-sm font-medium text-gray-600 mb-1">اختيار نوع المرسل </Label>
+                      <Select
+                        value={selectedSourceDestinationType}
+                        onValueChange={(value) => {
+                          setSelectedSourceDestination("");
+                          setSelectedSourceDestinationType(value);
+                          
+                        }}
+                      >
+                        <SelectTrigger className="w-full" dir="rtl">
+                          <SelectValue placeholder="اختر نوع المرسل ..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {sourceTypes.map((type) => (
+                            <SelectItem
+                              key={type.IdTypeSource}
+                              value={type.IdTypeSource.toString()}
+                            >
+                              {type.Libelle}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                <div className="bg-white p-3 rounded-lg">
-                  <Label className="block text-sm font-medium text-gray-600 mb-1">المرسل إليه</Label>
-
-                  <div className="bg-white p-3 rounded-lg">
-                    <p className="text-gray-800 font-medium">{message.Sources_Messageries_IdSourceDestinationToSources?.NomSource || message.AutreLibelleDestination}</p>
+                    {(Number(selectedSourceDestinationType) != 5) ? (
+                      <div className="space-y-2 w-full mt-6">
+                          <Label className="block text-sm font-medium text-gray-600 mb-1">اختيار المرسل إليه</Label>
+                        <SearchableSelect
+                          items={sourcesDestination}
+                          value={selectedSourceDestination}
+                          onValueChange={(value) => {
+                            setSelectedSourceDestination(value);
+                            handleChange('IdSourceDestination', Number(value)); 
+                          }}
+                          placeholder="اختر المرسل إليه "
+                          searchPlaceholder="ابحث عن المرسل إليه..."
+                          renderItem={(source: any) => (
+                            <div>
+                              <span>{source.NomSource}</span>
+                            </div>
+                          )}
+                        />
+                      </div>
+                    ) :
+                      null
+                    }
                   </div>
+                ) :
+                  (
+                    <div className="bg-white p-3 rounded-lg">
+                      <Label className="block text-sm font-medium text-gray-600 mb-1">المرسل إليه</Label>
 
-                </div>
+                      <div className="bg-white p-3 rounded-lg">
+                        <p className="text-gray-800 font-medium">{message.Sources_Messageries_IdSourceDestinationToSources?.NomSource || message.AutreLibelleDestination}</p>
+                      </div>
+
+                    </div>)
               ) : null
             }
-
-
+            </div>
           </div>
         </CardContent>
 

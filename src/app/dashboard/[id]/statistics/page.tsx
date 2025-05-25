@@ -15,7 +15,7 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts'
-import { DatePicker, Pagination } from 'antd'
+import { DatePicker, Pagination, Button } from 'antd'
 import dayjs from 'dayjs'
 const { RangePicker } = DatePicker
 
@@ -54,6 +54,70 @@ export default function StatisticsPage() {
 
     fetchStats()
   }, [id, dateRange])
+
+  const printProsecutorsTable = () => {
+    const printWindow = window.open('', '_blank')
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>نشاط السادة النواب</title>
+            <style>
+              body { font-family: Arial, sans-serif; direction: rtl; }
+              table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+              th, td { padding: 8px 12px; border: 1px solid #ddd; text-align: right; }
+              th { background-color: #f2f2f2; font-weight: bold; }
+              .header { text-align: center; margin-bottom: 20px; }
+              .date { text-align: left; margin-bottom: 10px; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>نشاط السادة النواب</h1>
+            </div>
+            <div class="date">تاريخ الطباعة: ${new Date().toLocaleDateString()}</div>
+            <table>
+              <thead>
+                <tr>
+                  <th>النائب</th>
+                  <th>منجز</th>
+                  <th>غير منجز</th>
+                  <th>نسبة الإنجاز</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${stats.prosecutors.map((prosecutor: any) => {
+        const total = prosecutor.completed + prosecutor.pending
+        const completionRate = total > 0 ? Math.round((prosecutor.completed / total) * 100) : 0
+        return `
+                    <tr>
+                      <td>${prosecutor.prosecutorName}</td>
+                      <td>${prosecutor.completed}</td>
+                      <td>${prosecutor.pending}</td>
+                      <td>
+                        <span style="padding: 2px 6px; border-radius: 12px; 
+                          ${completionRate >= 80 ? 'background-color: #d4edda; color: #155724;' :
+            completionRate >= 50 ? 'background-color: #fff3cd; color: #856404;' :
+              'background-color: #f8d7da; color: #721c24;'}"
+                        >
+                          ${completionRate}%
+                        </span>
+                      </td>
+                    </tr>
+                  `
+      }).join('')}
+              </tbody>
+            </table>
+          </body>
+        </html>
+      `)
+      printWindow.document.close()
+      printWindow.focus()
+      setTimeout(() => {
+        printWindow.print()
+      }, 500)
+    }
+  }
 
   if (loading) {
     return (
@@ -157,7 +221,7 @@ export default function StatisticsPage() {
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
-                  
+
                 >
                   {statusData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -167,7 +231,7 @@ export default function StatisticsPage() {
               </PieChart>
             </ResponsiveContainer>
           </div>
-          
+
           {/* Data Table */}
           <div className="w-full md:w-1/2">
             <div className="overflow-x-auto">
@@ -183,8 +247,8 @@ export default function StatisticsPage() {
                   {statusData.map((item, index) => (
                     <tr key={index}>
                       <td className="px-4 py-4 whitespace-nowrap text-right">
-                        <span className="inline-block w-3 h-3 rounded-full mr-2" 
-                              style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
+                        <span className="inline-block w-3 h-3 rounded-full mr-2"
+                          style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
                         {item.name}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-right">{item.value}</td>
@@ -207,7 +271,12 @@ export default function StatisticsPage() {
 
       {/* Prosecutors Table with Pagination */}
       <div className="bg-white p-6 rounded-lg shadow mb-8">
-        <h3 className="text-lg font-semibold mb-4 text-right"> نشاط السادة النواب </h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold text-right"> نشاط السادة النواب </h3>
+          <Button type="primary" onClick={printProsecutorsTable}>
+            طباعة
+          </Button>
+        </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -222,7 +291,7 @@ export default function StatisticsPage() {
               {paginatedProsecutors.map((prosecutor: any, index: number) => {
                 const total = prosecutor.completed + prosecutor.pending
                 const completionRate = total > 0 ? Math.round((prosecutor.completed / total) * 100) : 0
-                
+
                 return (
                   <tr key={index}>
                     <td className="px-6 py-4 whitespace-nowrap text-right">{prosecutor.prosecutorName}</td>
@@ -238,7 +307,7 @@ export default function StatisticsPage() {
               })}
             </tbody>
           </table>
-          
+
           {/* Pagination */}
           <div className="mt-4 flex justify-center">
             <Pagination
@@ -282,9 +351,9 @@ export default function StatisticsPage() {
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis type="number" />
-              <YAxis 
-                dataKey="typeName" 
-                type="category" 
+              <YAxis
+                dataKey="typeName"
+                type="category"
                 width={120}
                 tick={{ fontSize: 12 }}
               />

@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
         const messageries = await prisma.messageries.findMany({
             where: {
                 IdFiliere: idFiliere,
-                IsDeleted: false
+                // IsDeleted: false
             },
 
             include: {

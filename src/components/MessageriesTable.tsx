@@ -21,7 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { Dispatch, SetStateAction, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { format } from 'date-fns'
 import { Badge } from "@/components/ui/badge"
@@ -68,7 +68,7 @@ interface Messagerie {
 }
 
 interface DataTableProps<TData> {
-  setRefresh: (item: boolean) => void
+  setRefresh: Dispatch<SetStateAction<boolean>>
   data: any[]
 }
 
@@ -86,7 +86,7 @@ export function MessageriesTable<TData extends Messagerie>({
   const handleDelete = (Id: number) => {
     fetch(`/api/delete/${Id}`).then(() => {
       toast.success("تم الحذف بنجاح")
-      setRefresh(true)
+      setRefresh((prev)=>!prev)
     }).catch((err) => {
       toast.error("حدث خطأ أثناء الحذف", err)
     })
