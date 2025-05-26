@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider = "sqlserver"
-  url      = "sqlserver://localhost;database=Court;username=sa;password=1234;trustServerCertificate=true"
+  url      = "sqlserver://10.30.10.254;database=Court;username=docflow;password=1234;trustServerCertificate=true"
 }
 
 model Cadre {
@@ -67,7 +67,7 @@ model Messageries {
   AutreLibelleSource                                              String?           @db.NVarChar(50)
   DateArrivee                                                     DateTime?         @db.Date
   DateMessage                                                     DateTime?         @db.Date
-  Sujet                                                           String?           @db.NVarChar(255)
+  Sujet                                                           String?           @db.NVarChar(Max)
   IdFiliere                                                       Int?
   IdCode                                                          Int?
   Resultat                                                        String?           @db.NVarChar(Max)
@@ -127,6 +127,7 @@ model Reponses {
   IsDeleted          Boolean     @default(false, map: "DF_Reponses_IsDeleted")
   AutreLibelleSource String?     @db.NVarChar(100)
   NumeroReponse      String?     @db.NVarChar(30)
+  dateArriveReponse  DateTime?   @db.Date
   Messageries        Messageries @relation(fields: [IdMessagerie], references: [IdMessagerie], onUpdate: NoAction, map: "FK__Reponses__IdMess__5AEE82B9")
   Sources            Sources?    @relation(fields: [IdSource], references: [IdSource], onDelete: NoAction, onUpdate: NoAction, map: "FK__Reponses__IdSour__5BE2A6F2")
 }
@@ -167,7 +168,7 @@ model UserFonctionne {
 }
 
 model UtilisateurFiliere {
-  IdUtilisateur Int          @default(autoincrement())
+  IdUtilisateur Int
   IdFiliere     Int
   Filieres      Filieres     @relation(fields: [IdFiliere], references: [IdFiliere], onUpdate: NoAction, map: "FK__Utilisate__IdFil__412EB0B6")
   Utilisateurs  Utilisateurs @relation(fields: [IdUtilisateur], references: [IdUtilisateur], onUpdate: NoAction, map: "FK__Utilisate__IdUti__403A8C7D")
@@ -204,7 +205,7 @@ model GroupeFilieres {
 }
 
 model UtilisateurGroupeFilieres {
-  IdUtilisateur   Int            @default(autoincrement())
+  IdUtilisateur   Int
   IdGroupeFiliere Int
   GroupeFilieres  GroupeFilieres @relation(fields: [IdGroupeFiliere], references: [IdGroupeFiliere], onUpdate: NoAction, map: "FK__Utilisate__IdGro__43D61337")
   Utilisateurs    Utilisateurs   @relation(fields: [IdUtilisateur], references: [IdUtilisateur], onUpdate: NoAction, map: "FK__Utilisate__IdUti__42E1EEFE")

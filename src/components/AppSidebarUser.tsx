@@ -308,6 +308,13 @@ export function AppSidebarUser() {
                                                             </SidebarMenuButton>
                                                         </Link>
                                                     </SidebarMenuItem>
+                                                    <SidebarMenuItem >
+                                                        <Link href={"/dashboard/" + Current.IdFiliere + "/exchange"}>
+                                                            <SidebarMenuButton className="w-full h-fit   text-xs text-black hover:bg-gray-100 rounded-md transition-colors cursor-pointer">
+                                                                سجل التداول
+                                                            </SidebarMenuButton>
+                                                        </Link>
+                                                    </SidebarMenuItem>
                                                 </SidebarMenu>
                                             </CollapsibleContent>
                                         </Collapsible>
