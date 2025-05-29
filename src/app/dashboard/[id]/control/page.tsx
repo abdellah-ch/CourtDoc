@@ -53,12 +53,13 @@ export default function MessageriesStatisticsPage() {
                     columns: [
                         { header: "الرقم الترتيبي", accessorKey: "NumeroOrdre" },
                         { header: "رقم المراسلة", accessorKey: "NumeroMessagerie" },
-                        { header: "تاريخ الاجراء" },
-                        { header: "نائب الوكيل العام المكلف بالدراسة" },
                         { header: "تاريخ التسجيل" },
+                        { header: "نائب الوكيل العام المكلف بالدراسة" },
+                        { header: "الموضوع" ,accessorKey: "Sujet" },
+                        { header: "تاريخ الاجراء" },
                         { header: "الجهة المحال عليها الاجراء", id: "Masdar" },
-                        { header: "العمر الافتراضي من تاريخ البحث" },
                         { header: "العمر الافتراضي من تاريخ التسجيل" },
+                        { header: "العمر الافتراضي من تاريخ البحث" },
                     ]
                 }),
             })
@@ -105,15 +106,15 @@ export default function MessageriesStatisticsPage() {
                 // Calculate statistics
                 const today = new Date()
                 const over100 = result.filter((m: any) => {
-                    const lastEtude = m.Etude?.[0]
-                    if (!lastEtude?.DateDecision) return false
-                    return differenceInDays(today, new Date(lastEtude.DateDecision)) > 100
+                    // const lastEtude = m.Etude?.[0]
+                    // if (!lastEtude?.DateDecision) return false
+                    return differenceInDays(today, new Date(m.AddedDate)) > 100
                 }).length
 
                 const under100 = result.filter((m: any) => {
-                    const lastEtude = m.Etude?.[0]
-                    if (!lastEtude?.DateDecision) return false
-                    return differenceInDays(today, new Date(lastEtude.DateDecision)) <= 100
+                    // const lastEtude = m.Etude?.[0]
+                    // if (!lastEtude?.DateDecision) return false
+                    return differenceInDays(today, new Date(m.AddedDate)) <= 100
                 }).length
 
                 setStats({
@@ -152,34 +153,44 @@ export default function MessageriesStatisticsPage() {
             }
         },
         {
+            header: "تاريخ التسجيل",
+            cell: ({ row }) => {
+                return row.original.AddedDate
+                    ? format(new Date(row.original.AddedDate), 'yyyy-MM-dd')
+                    : '---'
+            },
+        },
+        {
+            header: " النائب المكلف",
+            cell: ({ row }) => {
+                const prosecutor = row.original.Etude?.[0]?.ProsecutorResponsables
+                return prosecutor ? `${prosecutor.prenom} ${prosecutor.nom}` : (row.original.prosecutor || "---")
+            },
+        },
+        {
+            accessorKey: "Sujet",
+            header: "الموضوع",
+            cell: ({ row }) => {
+                const sujet = row.original.Sujet
+                return (<div className='max-w-[300px] truncate'>  {sujet  ||  "---"}</div>) 
+            },
+        },
+        {
             header: "تاريخ الاجراء",
             cell: ({ row }) => {
                 const lastEtude = row.original.Etude?.[0]
                 return lastEtude?.DateDecision
                     ? format(new Date(lastEtude.DateDecision), 'yyyy-MM-dd')
-                    : 'N/A'
+                    : '---'
             },
         },
-        {
-            header: "نائب الوكيل العام المكلف بالدراسة",
-            cell: ({ row }) => {
-                const prosecutor = row.original.Etude?.[0]?.ProsecutorResponsables
-                return prosecutor ? `${prosecutor.prenom} ${prosecutor.nom}` : 'N/A'
-            },
-        },
-        {
-            header: "تاريخ التسجيل",
-            cell: ({ row }) => {
-                return row.original.AddedDate
-                    ? format(new Date(row.original.AddedDate), 'yyyy-MM-dd')
-                    : 'N/A'
-            },
-        },
+
+
         {
             id: "Masdar",
-            header: "الجهة المحال عليها الاجراء",
+            header: "الجهة المحال عليها ",
             cell: ({ row }) => {
-                return row.original.Etude?.[0]?.Sources?.NomSource || 'N/A'
+                return row.original.Etude?.[0]?.Sources?.NomSource || '---'
             },
             filterFn: (row, id, value) => {
                 if (value === undefined || value === "") return true
@@ -188,24 +199,30 @@ export default function MessageriesStatisticsPage() {
             }
         },
         {
-            header: "العمر الافتراضي من تاريخ البحث",
+            header: "العمر الافتراضي \n  من تاريخ التسجيل  ",
+            
             cell: ({ row }) => {
-                const lastEtude = row.original.Etude?.[0]
-                if (!lastEtude?.DateDecision) return 'N/A'
-
-                const diff = differenceInDays(new Date(), new Date(lastEtude.DateDecision))
-                return `${diff} يوم`
-            },
-        },
-        {
-            header: "العمر الافتراضي من تاريخ التسجيل",
-            cell: ({ row }) => {
-                if (!row.original.AddedDate) return 'N/A'
+                if (!row.original.AddedDate) return '---'
 
                 const diff = differenceInDays(new Date(), new Date(row.original.AddedDate))
-                return `${diff} يوم`
+                return `${diff} `
+            },
+            meta: {
+                className: "whitespace-pre-line" // This will make text break at \n
+            }
+        },
+        {
+            header: " العمر الافتراضي \n تاريخ البحث  ",
+            
+            cell: ({ row }) => {
+                const lastEtude = row.original.Etude?.[0]
+                if (!lastEtude?.DateDecision) return '---'
+
+                const diff = differenceInDays(new Date(), new Date(lastEtude.DateDecision))
+                return `${diff} `
             },
         },
+
     ]
 
     // Initialize table with filtering
@@ -233,7 +250,7 @@ export default function MessageriesStatisticsPage() {
     }
 
     return (
-        <div className="container mx-auto p-6">
+        <div className="container mx-auto p-6 custom-scrollbar">
             <div className="flex justify-between items-center mb-4">
                 <h1 className="text-2xl font-bold">لوائح القيادة الخاصة</h1>
                 <div className="flex items-center gap-4">
@@ -293,20 +310,20 @@ export default function MessageriesStatisticsPage() {
                 />
             </div>
 
-            <div className="rounded-md border">
-                <Table dir='rtl'>
+            <div className="rounded-md border custom-scrollbar">
+                <Table dir='rtl' >
                     <TableHeader >
                         {table.getHeaderGroups().map(headerGroup => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map(header => (
-                                    <TableHead key={header.id} className='text-right'>
+                                    <TableHead key={header.id} className='text-right p-2 whitespace-pre-line'>
                                         {flexRender(header.column.columnDef.header, header.getContext())}
                                     </TableHead>
                                 ))}
                             </TableRow>
                         ))}
                     </TableHeader>
-                    <TableBody>
+                    <TableBody >
                         {table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map(row => (
                                 <TableRow key={row.id}>

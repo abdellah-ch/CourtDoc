@@ -65,9 +65,9 @@ export default function LoginPage() {
 
   return (
     <LanguageWrapper lang={language}>
-      <div className="min-h-screen flex items-center justify-center  px-4">
-        <div className="bg-white shadow-md rounded-2xl p-8 max-w-md w-full space-y-6">
-          <div className="flex justify-between items-center">
+      <div className="min-h-screen flex items-center justify-center  px-4 bg-[url('/bg.png')] bg-repeat bg-[length:160px_160px]">
+        <div className="bg-white border-2 border-[#ccc] shadow-md rounded-none p-8 max-w-[350px] w-full space-y-6">
+          {/* <div className="flex justify-between items-center">
             <h1 className="text-2xl font-bold">
               {isArabic ? 'تسجيل الدخول' : 'Connexion'}
             </h1>
@@ -77,44 +77,56 @@ export default function LoginPage() {
             >
               {isArabic ? 'Français' : 'العربية'}
             </button>
-          </div>
+          </div> */}
 
           {error && <p className="text-red-600 text-center">{error}</p>}
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4 w-full">
+            <div className='flex justify-center'>
+              <p className="text-xl w-fit  mb-2 text-gray-400 flex items-center justify-center gap-2 border-b-[1px] border-gray-400">
+                <span><img src="/Gavel.png" className='h-5 w-5'/></span> نظام تدبير  المراسلات
+              </p>
+            </div>
+            <div className='w-fit m-auto mb-5 flex justify-center items-center rounded-full border-[1px] border-gray-200'>
+              <img src="/logoLogin.png" className='w-20 h-20 '/>
+            </div>
             <div>
-              <label className="block mb-1 font-semibold">
+              {/* <label className="block mb-1 font-semibold">
                 {isArabic ? 'اسم المستخدم' : 'Nom d\'utilisateur'}
-              </label>
+              </label> */}
               <input
                 type="text"
-                className="w-full border border-gray-300 p-2 rounded-md"
+                className="w-full border border-gray-300 p-2 rounded-xs"
+                placeholder='اسم المستخدم'
                 value={UserName}
                 onChange={(e) => setUserName(e.target.value)}
               />
-            </div>
-            <div>
-              <label className="block mb-1 font-semibold">
+            {/* </div>
+            <div> */}
+              {/* <label className="block mb-1 font-semibold">
                 {isArabic ? 'كلمة المرور' : 'mot de passe'}
-              </label>
+              </label> */}
               <input
                 type="password"
-                className="w-full border border-gray-300 p-2 rounded-md"
+                className="w-full border border-gray-300 p-2 rounded-xs"
+                placeholder='كلمة المرور'
                 value={Password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
+            <div className='flex justify-center'>
             <button
-              type="button"
+              type="submit"
               disabled={isDisabled || UserName === "" || Password === ""}
               onClick={handleLogin}
               
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-md font-bold cursor-pointer disabled:bg-gray-400 
+                className="w-[350px] m-auto  bg-[#268DC6]  text-white p-2 rounded-sm  cursor-pointer disabled:bg-gray-400 
              disabled:cursor-not-allowed 
              disabled:opacity-70"
             >
-              {isArabic ? 'دخول' : 'Se connecter'}
+              {isArabic ? 'تسجيل الدخول' : 'Se connecter'}
             </button>
+            </div>
           </form>
         </div>
       </div>

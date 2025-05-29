@@ -179,12 +179,16 @@ export default function StatisticsPage() {
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-right">إحصائيات الشعبة</h1>
+      <div className="flex justify-between items-start mb-6">
+        
+        <h2 className="text-2xl text-[#003566] font-bold text-right mb-6 relative inline-block pb-2">
+          إحصائيات الشعبة
+             <span className="absolute bottom-0 right-0 w-16 h-[2px] bg-[#ffbc2b]"></span>
+        </h2>
         <RangePicker
           onChange={(dates) => setDateRange(dates as [dayjs.Dayjs, dayjs.Dayjs])}
           format="YYYY-MM-DD"
-          className="text-right"
+          className="text-right mb-6"
           placeholder={['تاريخ البدء', 'تاريخ الانتهاء']}
         />
       </div>

@@ -143,7 +143,7 @@ export default function MessageDetailPage() {
       }
 
       try {
-        const response = await fetch(`/api/sources?typeId=${selectedSourceType}`);
+        const response = await fetch(`/api/sources?typeId=${selectedSourceDestinationType}`);
         if (!response.ok) throw new Error('Failed to fetch sources');
         const data = await response.json();
         setSourcesDestination(data);
@@ -246,7 +246,7 @@ export default function MessageDetailPage() {
       if (!response.ok) throw new Error('Failed to generate document');
 
       const blob = await response.blob();
-      const filename = `folder-document.docx`;
+      const filename = `${message.NumeroOrdre}.docx`;
       saveAs(blob, filename);
 
     } catch (error) {
@@ -254,6 +254,28 @@ export default function MessageDetailPage() {
       console.error('Download error:', error);
     }
   }
+  // const handleDownloadFolder = async () => {
+  //   try {
+  //     const response = await fetch('/api/generate-Messagerie-docx', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({
+  //         message,
+  //         formate: 'pdf'  // Explicitly request PDF format
+  //       }),
+  //     });
+
+  //     if (!response.ok) throw new Error('Failed to generate document');
+
+  //     const blob = await response.blob();
+  //     const filename = `${message.NumeroOrdre}.pdf`;  // Change extension to .pdf
+  //     saveAs(blob, filename);
+
+  //   } catch (error) {
+  //     toast.error('فشل في إنشاء الوثيقة');
+  //     console.error('Download error:', error);
+  //   }
+  // }
 
   const handleDownload = async () => {
     try {
@@ -650,7 +672,7 @@ export default function MessageDetailPage() {
                   <div>
                     {/* Type Source */}
                     <div className="space-y-2 w-full">
-                        <Label className="block text-sm font-medium text-gray-600 mb-1">اختيار نوع المرسل </Label>
+                        <Label className="block text-sm font-medium text-gray-600 mb-1">اختيار نوع المرسل إليه</Label>
                       <Select
                         value={selectedSourceDestinationType}
                         onValueChange={(value) => {

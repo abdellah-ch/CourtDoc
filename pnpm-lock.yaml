@@ -104,6 +104,9 @@ importers:
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.2
+      libreoffice:
+        specifier: ^0.4.5
+        version: 0.4.5
       lucide-react:
         specifier: ^0.488.0
         version: 0.488.0(react@19.1.0)
@@ -2653,6 +2656,10 @@ packages:
   levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
+
+  libreoffice@0.4.5:
+    resolution: {integrity: sha512-Ai12fueA8Kdinnr4P3uM2aVdMfi4zU+EP3XzbyvJWUR0TS/DkNpNFheHlVn3237X3vAb92A5NSaLq+XaLAStYA==}
+    engines: {node: '>=6'}
 
   lie@3.3.0:
     resolution: {integrity: sha512-UaiMJzeWRlEujzAuw5LokY1L5ecNQYZKfmyZ9L7wDHb/p5etKaxXhohBcrw0EYby+G/NA52vRSN4N39dxHAIwQ==}
@@ -6464,6 +6471,11 @@ snapshots:
     dependencies:
       prelude-ls: 1.2.1
       type-check: 0.4.0
+
+  libreoffice@0.4.5:
+    dependencies:
+      async: 3.2.6
+      tmp: 0.2.3
 
   lie@3.3.0:
     dependencies:

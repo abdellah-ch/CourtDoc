@@ -163,7 +163,7 @@ export default function AddMessagerieForm() {
       const response = await createMessagerie(messagerieData);
       const data = await response
       console.log(data.IdMessagerie);
-      const idM = data.IdMessagerie 
+      const idM = data.IdMessagerie
       // Handle success
       toast.success("تم حفظ الإرسالية بنجاح");
 
@@ -186,8 +186,10 @@ export default function AddMessagerieForm() {
     }
   }
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md lg:max-w-6xl md:max-w-xl m-auto">
-      <h2 className="text-2xl font-bold text-right mb-6">إضافة إرسالية ({filiereLibelle})</h2>
+    <div className="p-6 bg-white rounded-lg shadow-xl lg:max-w-6xl md:max-w-xl m-auto">
+      <h2 className="text-2xl text-[#003566] font-bold text-right mb-6 relative inline-block pb-2">إضافة إرسالية ({filiereLibelle})
+        <span className="absolute bottom-0 right-0 w-16 h-[2px] bg-[#ffbc2b]"></span>
+        </h2>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" method="post">
@@ -319,9 +321,7 @@ export default function AddMessagerieForm() {
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date("1900-01-01")
-                        }
+                        
                         initialFocus
                         locale={ar}
                       />
@@ -639,7 +639,7 @@ export default function AddMessagerieForm() {
                       value={field.value || ""}
                     />
                   </FormControl>
-                  
+
                   <FormMessage />
                 </FormItem>
               )}
@@ -665,7 +665,7 @@ export default function AddMessagerieForm() {
             >
               إلغاء
             </Button>
-            <Button type="submit" disabled={isDisabled} onClick={() => console.log(form.getValues())}>حفظ الإرسالية</Button>
+            <Button className="bg-[#003566] hover:bg-[#ffbc2b] hover:text-[#003566]" type="submit" disabled={isDisabled} onClick={() => console.log(form.getValues())}>حفظ الإرسالية</Button>
           </div>
         </form>
       </Form>

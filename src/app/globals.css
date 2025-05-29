@@ -166,3 +166,11 @@ body::-webkit-scrollbar-track {
   scrollbar-width: thin;
   scrollbar-color: #a0aec0 #f7fafc;
 }
+
+th{
+  color: #003566;
+}
+
+h1,h2,h3{
+  color: #003566;
+}

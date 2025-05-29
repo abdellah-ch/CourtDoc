@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider = "sqlserver"
-  url      = "sqlserver://10.30.10.254;database=Court;username=docflow;password=1234;trustServerCertificate=true"
+  url      = "sqlserver://localhost;database=Court;username=sa;password=1234;trustServerCertificate=true"
 }
 
 model Cadre {
@@ -67,7 +67,7 @@ model Messageries {
   AutreLibelleSource                                              String?           @db.NVarChar(50)
   DateArrivee                                                     DateTime?         @db.Date
   DateMessage                                                     DateTime?         @db.Date
-  Sujet                                                           String?           @db.NVarChar(Max)
+  Sujet                                                           String?           @db.NVarChar(255)
   IdFiliere                                                       Int?
   IdCode                                                          Int?
   Resultat                                                        String?           @db.NVarChar(Max)
@@ -168,7 +168,7 @@ model UserFonctionne {
 }
 
 model UtilisateurFiliere {
-  IdUtilisateur Int
+  IdUtilisateur Int          @default(autoincrement())
   IdFiliere     Int
   Filieres      Filieres     @relation(fields: [IdFiliere], references: [IdFiliere], onUpdate: NoAction, map: "FK__Utilisate__IdFil__412EB0B6")
   Utilisateurs  Utilisateurs @relation(fields: [IdUtilisateur], references: [IdUtilisateur], onUpdate: NoAction, map: "FK__Utilisate__IdUti__403A8C7D")
@@ -205,7 +205,7 @@ model GroupeFilieres {
 }
 
 model UtilisateurGroupeFilieres {
-  IdUtilisateur   Int
+  IdUtilisateur   Int            @default(autoincrement())
   IdGroupeFiliere Int
   GroupeFilieres  GroupeFilieres @relation(fields: [IdGroupeFiliere], references: [IdGroupeFiliere], onUpdate: NoAction, map: "FK__Utilisate__IdGro__43D61337")
   Utilisateurs    Utilisateurs   @relation(fields: [IdUtilisateur], references: [IdUtilisateur], onUpdate: NoAction, map: "FK__Utilisate__IdUti__42E1EEFE")
@@ -243,4 +243,9 @@ model sysdiagrams {
   definition   Bytes?
 
   @@unique([principal_id, name], map: "UK_principal_name")
+}
+
+model ExchangePrintCounters {
+  Id                        Int @id(map: "PK__Exchange__3214EC07EBC433BF") @default(autoincrement())
+  OrdreExchangePrintCounter Int @default(0, map: "DF__ExchangeP__Ordre__756D6ECB")
 }

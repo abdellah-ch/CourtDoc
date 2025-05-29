@@ -60,28 +60,28 @@ export async function POST(request: NextRequest) {
                 if (col.accessorKey) {
                     return row[col.accessorKey]
                 } else if (col.id === 'Masdar') {
-                    return row.Etude?.[0]?.Sources?.NomSource || 'N/A'
+                    return row.Etude?.[0]?.Sources?.NomSource || '---'
                 } else if (col.header === 'تاريخ الاجراء') {
                     const lastEtude = row.Etude?.[0]
                     return lastEtude?.DateDecision
                         ? format(new Date(lastEtude.DateDecision), 'yyyy-MM-dd')
-                        : 'N/A'
+                        : '---'
                 } else if (col.header === 'نائب الوكيل العام المكلف بالدراسة') {
                     const prosecutor = row.Etude?.[0]?.ProsecutorResponsables
-                    return prosecutor ? `${prosecutor.prenom} ${prosecutor.nom}` : 'N/A'
+                    return prosecutor ? `${prosecutor.prenom} ${prosecutor.nom}` : '---'
                 } else if (col.header === 'تاريخ التسجيل') {
                     return row.AddedDate
                         ? format(new Date(row.AddedDate), 'yyyy-MM-dd')
-                        : 'N/A'
+                        : '---'
                 } else if (col.header === 'العمر الافتراضي من تاريخ البحث') {
                     const lastEtude = row.Etude?.[0]
-                    if (!lastEtude?.DateDecision) return 'N/A'
+                    if (!lastEtude?.DateDecision) return '---'
                     const diff = Math.floor((new Date().getTime() - new Date(lastEtude.DateDecision).getTime()) / (1000 * 60 * 60 * 24))
-                    return `${diff} يوم`
+                    return `${diff}`
                 } else if (col.header === 'العمر الافتراضي من تاريخ التسجيل') {
-                    if (!row.AddedDate) return 'N/A'
+                    if (!row.AddedDate) return '---'
                     const diff = Math.floor((new Date().getTime() - new Date(row.AddedDate).getTime()) / (1000 * 60 * 60 * 24))
-                    return `${diff} يوم`
+                    return `${diff}`
                 }
                 return ''
             })

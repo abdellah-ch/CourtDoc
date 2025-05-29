@@ -28,7 +28,8 @@ export function SearchableSelect({
     }, [items, searchTerm])
 
     return (
-        <Select value={value} onValueChange={onValueChange} >
+        <Select                       
+         value={value} onValueChange={onValueChange} >
             <SelectTrigger dir='rtl' className='cursor-pointer w-full'>
                 <SelectValue placeholder={placeholder} />
             </SelectTrigger>
@@ -51,7 +52,7 @@ export function SearchableSelect({
                             <SelectItem
                                 key={item.IdUtilisateur || item.IdFiliere || item.IdGroupeFiliere || item.IdSource || item.IdResponsable  }
                                 value={item.IdUtilisateur?.toString() || item.IdFiliere?.toString() || item.IdGroupeFiliere?.toString() || item.IdSource?.toString() || item.IdResponsable?.toString() }
-                                className='cursor-pointer'
+                                className="hover:bg-[#FFBC2B]/10 focus:bg-[#FFBC2B]/20 cursor-pointer"
                             >
                                 {renderItem(item)}
                             </SelectItem>

@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button"
 import { SearchableSelect } from "@/components/SearchableSelect"
 import { format } from 'date-fns'
 import { Printer } from 'lucide-react'
+import { Checkbox } from "@/components/ui/checkbox"
 
 export default function ProsecutorExchangeLogPage() {
     const { id } = useParams()
@@ -31,6 +32,21 @@ export default function ProsecutorExchangeLogPage() {
     const [dateRange, setDateRange] = useState<any | null>(null)
     const [selectedProsecutor, setSelectedProsecutor] = useState<string>("")
     const [prosecutors, setProsecutors] = useState<any[]>([])
+    const [excludedRows, setExcludedRows] = useState<Set<string>>(new Set())
+    const [OrdreExchangePrintCounter, setOrdreExchangePrintCounter] = useState<string>("")
+    useEffect(() => {
+        const getCurrentOrdreNumberPrintExchange = async () => {
+            const response = await fetch("/api/getCurrentOrdreNumberExchange");
+
+            const data = await response.json();
+
+            // console.log(data);
+
+            setOrdreExchangePrintCounter(data.OrdreExchangePrintCounter)
+
+        }
+        getCurrentOrdreNumberPrintExchange()
+    }, [OrdreExchangePrintCounter])
 
     // Fetch prosecutors list
     useEffect(() => {
@@ -52,6 +68,7 @@ export default function ProsecutorExchangeLogPage() {
 
         setLoading(true)
         setSearchClicked(true)
+        setExcludedRows(new Set()) // Reset excluded rows on new search
 
         try {
             const [start, end] = dateRange
@@ -73,12 +90,31 @@ export default function ProsecutorExchangeLogPage() {
         }
     }
 
+    const toggleRowExclusion = (id: string) => {
+        setExcludedRows(prev => {
+            const newSet = new Set(prev)
+            if (newSet.has(id)) {
+                newSet.delete(id)
+            } else {
+                newSet.add(id)
+            }
+            return newSet
+        })
+    }
+
     const handlePrint = () => {
+        fetch("/api/getCurrentOrdreNumberExchange",{
+            method:"PUT"
+        })
+        setOrdreExchangePrintCounter("")
         const printWindow = window.open('', '', 'width=800,height=600')
         if (!printWindow) return
 
         const currentDate = format(new Date(), 'yyyy-MM-dd')
         const prosecutorName = prosecutors.find(p => p.IdResponsable?.toString() === selectedProsecutor)?.nom || ''
+
+        // Filter out excluded rows
+        const filteredData = data.filter(item => !excludedRows.has(item.IdMessagerie.toString()))
 
         printWindow.document.write(`
             <!DOCTYPE html>
@@ -103,6 +139,7 @@ export default function ProsecutorExchangeLogPage() {
             </head>
             <body>
                 <div class="header">
+                    <div>رقم سجل التداول : ${OrdreExchangePrintCounter}</div>
                     <div>مراكش بتاريخ ${currentDate}</div>
                 </div>
                 <div class="ImageHeader">
@@ -121,7 +158,7 @@ export default function ProsecutorExchangeLogPage() {
                         </tr>
                     </thead>
                     <tbody>
-                        ${data.map(item => {
+                        ${filteredData.map(item => {
             const etude = item.Etude?.[0]
             return `
                                 <tr>
@@ -147,6 +184,16 @@ export default function ProsecutorExchangeLogPage() {
 
     // Table columns
     const columns: ColumnDef<any>[] = [
+        {
+            id: "exclude",
+            header: "استثناء من الطباعة",
+            cell: ({ row }) => (
+                <Checkbox
+                    checked={excludedRows.has(row.original.IdMessagerie.toString())}
+                    onCheckedChange={() => toggleRowExclusion(row.original.IdMessagerie.toString())}
+                />
+            ),
+        },
         {
             accessorKey: "NumeroOrdre",
             header: "الرقم الترتيبي",
@@ -275,7 +322,10 @@ export default function ProsecutorExchangeLogPage() {
                                 </Table>
                             </div>
 
-                            <div className="flex justify-end">
+                            <div className="flex justify-between items-center">
+                                <div className="text-sm text-gray-500">
+                                    {excludedRows.size} صفوف مستثناة من الطباعة
+                                </div>
                                 <Button onClick={handlePrint} className="flex gap-2">
                                     <Printer className="h-4 w-4" />
                                     طباعة الجدول

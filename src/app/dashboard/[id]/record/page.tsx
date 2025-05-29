@@ -59,8 +59,8 @@ export default function FiliereArchivePage({ params }: any) {
         return (
             <div className="p-6 flex justify-center items-center h-[50vh]">
                 <div className="text-center space-y-2">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-                    <p className="text-lg font-medium">جاري التحميل...</p>
+                    <div className="animate-spin  rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ffbc2b] mx-auto"></div>
+                    <p className="text-lg text-[#ffbc2b] font-medium">جاري التحميل...</p>
                 </div>
             </div>
         );
@@ -69,26 +69,27 @@ export default function FiliereArchivePage({ params }: any) {
     return (
         <div className="p-6 space-y-4">
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-right">
+                <h1 className="text-2xl text-[#003566] font-bold text-right mb-6 relative inline-block pb-2">
                     سجل {libelle}
+                    <span className="absolute bottom-0 right-0 w-16 h-[2px] bg-[#ffbc2b]"></span>
                 </h1>
 
                 <div className="flex items-center gap-4">
-                    <Button
+                    {/* <Button
                         variant="outline"
                         className="gap-2"
                         onClick={() => { }}
                     >
                         <Download className="h-4 w-4" />
                         تصدير Excel
-                    </Button>
+                    </Button> */}
                 </div>
             </div>
 
             <div className="flex flex-wrap gap-4 items-center mt-7 mb-0">
                 {/* Year Filter */}
                 <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">السنة:</span>
+                    <span className="text-sm font-medium text-[#003566]">السنة:</span>
                     <Select
                         dir="rtl"
                         value={yearFilter}
@@ -110,7 +111,7 @@ export default function FiliereArchivePage({ params }: any) {
 
                 {/* Status Filter */}
                 <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">الحالة:</span>
+                    <span className="text-sm font-medium text-[#003566]">الحالة:</span>
                     <Select
                         dir="rtl"
                         value={statusFilter}

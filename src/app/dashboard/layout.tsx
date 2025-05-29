@@ -18,13 +18,13 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
             <Toaster />
 
             {/* Sidebar */}
-            <div className={`xl:w-[15%] lg:w-[20%] md:w-[25%]  h-full absolute right-0  border-l-2 hidden md:block overflow-y-hidden`}>
+            <div className={`xl:w-[18%] lg:w-[20%] md:w-[25%]  h-full absolute right-0  border-l-2 hidden md:block overflow-y-hidden`}>
                 {/* Sidebar content */}
                 <AppSidebarUser />
             </div>
 
             {/* Main Content */}
-            <main className={`xl:w-[85%] lg:w-[80%] md:w-[75%] md:p-4 h-full   bg-gray-50 absolute left-0 overflow-y-scroll`}>
+            <main className={`xl:w-[82%] lg:w-[80%] md:w-[75%] md:p-4 h-full   bg-gray-50 absolute left-0 overflow-y-scroll`}>
                 {children}
             </main>
         </div>

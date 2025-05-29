@@ -13,6 +13,9 @@ export async function POST(request: NextRequest) {
         const templatePath = path.join(process.cwd(), 'public', 'template.docx');
         const template = fs.readFileSync(templatePath);
 
+
+        console.log("aaaaaaaaaaaalllllllllllllllllll",message);
+        
         // 3. Get the latest Etude (if exists)
         const latestEtude = message.Etude?.length > 0
             ? message.Etude.reduce((latest: any, current: any) => {
@@ -23,14 +26,16 @@ export async function POST(request: NextRequest) {
             : null;
 
         // 4. Prepare template data
+        console.log('ddddddddddddddddddddddddd',latestEtude);
+        
         const data = {
             NumeroO: ` 2025-1-${message.NumeroOrdre}` || '',
             // Updated to use Etude's source instead of Messagerie's destination
             SoureceDes: latestEtude?.Sources?.NomSource ||
                 latestEtude?.IdSource || latestEtude.AutreLibelleSource, // Fallback to ID if name not available
-            dateCreat: format(message.AddedDate, "yyyy-MM-dd") || '',
+            dateCreat: format(new Date(latestEtude.DateEtude), "yyyy-MM-dd") || '',
             SujetMessaj: message.Sujet || '',
-            NumeroM: message.NumeroMessagerie || '',
+            NumeroM: message.NumeroMessagerie  || '',
             dateM: format(message.DateMessage, "yyyy-MM-dd") || '',
             decision: latestEtude?.decision || ''
         };
@@ -52,6 +57,8 @@ export async function POST(request: NextRequest) {
     } else {
         const templatePath = path.join(process.cwd(), 'public', 'templatev2.docx');
         const template = fs.readFileSync(templatePath);
+        
+        console.log("aaaaaaaaaaaalllllllllllllllllll", message);
 
 
         // 3. Get the latest Etude (if exists)

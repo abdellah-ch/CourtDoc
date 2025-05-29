@@ -19,12 +19,12 @@ export async function GET(request: Request) {
     const where: any = {
       IdFiliere: parseInt(idFiliere),
       Statut: 'غير منجز',
-      IsDeleted: false,
-      Etude: {
-        some: {
-          DateDecision: { not: null } // Only include messageries with at least one etude that has DateDecision
-        }
-      }
+      // IsDeleted: false,
+      // Etude: {
+      //   some: {
+      //     DateDecision: { not: null } // Only include messageries with at least one etude that has DateDecision
+      //   }
+      // }
     }
 
     // Filter by AddedDate (registration date)
@@ -63,9 +63,9 @@ export async function GET(request: Request) {
     })
 
     // Filter out any messageries that ended up with no etudes after the where clause
-    const filteredMessageries = messageries.filter(m => m.Etude.length > 0)
+    // const filteredMessageries = messageries.filter(m => m.Etude.length > 0)
 
-    return NextResponse.json(filteredMessageries)
+    return NextResponse.json(messageries)
   } catch (error : any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }

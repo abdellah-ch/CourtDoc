@@ -54,6 +54,7 @@ interface Messagerie {
   IdFiliere: number | null
   participants_courrier: string
   underSupervision: boolean
+  prosecutor:string
   Sources?: {
     NomSource: string
   }
@@ -142,10 +143,9 @@ export function MessageriesTable<TData extends Messagerie>({
             </div>
           )
         } else {
-          let Procecuteur = ""
           return (
             <div className="text-right">
-              {Procecuteur ? Procecuteur : "---"}
+              {(row.original.prosecutor)}
             </div>
           )
         }
@@ -361,7 +361,7 @@ export function MessageriesTable<TData extends Messagerie>({
           />
         </div>
 
-        <Button variant="default" className="gap-2" onClick={(e) => { e.preventDefault(); router.push(`/dashboard/${id}/newm`) }}>
+        <Button variant="default" className="gap-2 bg-[#003566] hover:bg-[#ffbc2b] hover:text-[#003566]" onClick={(e) => { e.preventDefault(); router.push(`/dashboard/${id}/newm`) }}>
           <PlusIcon className="h-4 w-4" />
           إضافة
         </Button>
@@ -383,7 +383,10 @@ export function MessageriesTable<TData extends Messagerie>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow key={row.id} onClick={(e) => {
+                  e.stopPropagation();
+                  router.push(`/dashboard/${id}/messagerie/${row.original.IdMessagerie}`);
+                }}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
