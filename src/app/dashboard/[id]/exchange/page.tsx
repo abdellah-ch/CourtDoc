@@ -120,7 +120,7 @@ export default function ProsecutorExchangeLogPage() {
             <!DOCTYPE html>
             <html dir="rtl">
             <head>
-                <title>سجل تداول مع السادة النواب</title>
+                <title>سجل التداول مع السادة النواب</title>
                 <style>
                     body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
                     .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
@@ -139,14 +139,14 @@ export default function ProsecutorExchangeLogPage() {
             </head>
             <body>
                 <div class="header">
-                    <div>رقم سجل التداول : ${OrdreExchangePrintCounter}</div>
+                    <div>رقم سجل  التداول : ${OrdreExchangePrintCounter}</div>
                     <div>مراكش بتاريخ ${currentDate}</div>
                 </div>
                 <div class="ImageHeader">
                     <img src="/header.jpg" />
                 </div>
 
-                <div class="title">سجل تداول مع السادة النواب</div>
+                <div class="title">سجل التداول مع السادة النواب</div>
                 <table>
                     <thead>
                         <tr>
@@ -247,7 +247,7 @@ export default function ProsecutorExchangeLogPage() {
 
     return (
         <div className="container mx-auto p-6">
-            <h1 className="text-2xl font-bold mb-6">سجل تداول مع السادة النواب</h1>
+            <h1 className="text-2xl font-bold mb-6">سجل التداول مع السادة النواب</h1>
 
             {/* Search Form */}
             <div className="bg-white p-6 rounded-lg shadow mb-6">

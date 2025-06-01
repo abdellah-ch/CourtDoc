@@ -239,18 +239,7 @@ export function MessageriesTable<TData extends Messagerie>({
       cell: ({ row }) => {
         return (
           <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-gray-100 cursor-pointer"
-              onClick={(e) => {
-                e.stopPropagation();
-                router.push(`/dashboard/${id}/messagerie/${row.original.IdMessagerie}`);
-              }}
-            >
-              <Eye className="h-4 w-4" />
-              <span className="sr-only">عرض التفاصيل</span>
-            </Button>
+            
 
             <Button
               variant="ghost"
@@ -266,23 +255,7 @@ export function MessageriesTable<TData extends Messagerie>({
               <span className="sr-only">حذف</span>
             </Button>
 
-            <DropdownMenu dir="rtl">
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0 text-muted-foreground hover:bg-gray-100">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem className="cursor-pointer">
-                  <FileText className="mr-2 h-4 w-4" />
-                  تصدير PDF
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
-                  <Printer className="mr-2 h-4 w-4" />
-                  طباعة
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            
           </div>
         );
       },
@@ -312,7 +285,13 @@ export function MessageriesTable<TData extends Messagerie>({
         onConfirm={handleDelete}
         IdDeleteMessagerie={IdDeleteMessagerie}
       />
+      <div className="text-[#003566] text-base font-medium my-2 mt-4">
+        <p>
+          <span className="text-red-400"> عدد المراسلات </span>:{data.length}
+        </p>
+      </div>
       <div className="flex items-center py-2 gap-4 flex-wrap justify-between">
+        
         <div className="flex items-center py-4 gap-4">
           <Input
             placeholder="ابحث الرقم الترتيبي..."
@@ -359,6 +338,7 @@ export function MessageriesTable<TData extends Messagerie>({
             }
             className="max-w-xs"
           />
+          
         </div>
 
         <Button variant="default" className="gap-2 bg-[#003566] hover:bg-[#ffbc2b] hover:text-[#003566]" onClick={(e) => { e.preventDefault(); router.push(`/dashboard/${id}/newm`) }}>
@@ -383,7 +363,9 @@ export function MessageriesTable<TData extends Messagerie>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} onClick={(e) => {
+                <TableRow
+                className="cursor-pointer"
+                key={row.id} onClick={(e) => {
                   e.stopPropagation();
                   router.push(`/dashboard/${id}/messagerie/${row.original.IdMessagerie}`);
                 }}>

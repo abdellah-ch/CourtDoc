@@ -82,6 +82,7 @@ export default function ResponseSearchPage() {
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             className="flex-1 text-right"
           />
+          
           <Button onClick={handleSearch} disabled={loading}>
             {loading ? "جاري البحث..." : (
               <>
